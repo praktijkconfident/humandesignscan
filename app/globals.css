@@ -4,15 +4,15 @@
    Je hebt deze al klaarstaan in de prompt-bouwer!
    ══════════════════════════════════════════════════════════════ */
 
-:root {
-  --color-primair:      #3b5633;   /* ← jouw hoofdkleur     */
-  --color-achtergrond:  #fcebdc;   /* ← achtergrondkleur    */
-  --color-tekst:        #2a3a3c;   /* ← tekstkleur          */
-  --color-accent-1:     #9e3816;   /* ← accentkleur 1       */
-  --color-accent-2:     #d56119;   /* ← accentkleur 2       */
-  --color-accent-3:     #758d69;   /* ← accentkleur 3       */
-  --color-wit:          #ffffff;
-}
+:root{
+    --dark-green:#2d4a3e;
+    --gold:#c9a84c;
+    --cream:#f7f4ec;
+    --green-soft:#3e5f51;
+    --green-pale:#e7ede9;
+    --ink:#233129;
+    --line:#d8cfb8;
+  }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -68,8 +68,8 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-achtergrond);
-  color: var(--color-tekst);
+  background-color: var(--cream);
+  color: var(--ink);
   font-family: var(--font-hoofd, Inter, system-ui, sans-serif);
   line-height: 1.75;
 }

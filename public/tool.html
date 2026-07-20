@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Design, helder en toepasbaar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dark-green:#2d4a3e;
+    --gold:#c9a84c;
+    --cream:#f7f4ec;
+    --green-soft:#3e5f51;
+    --green-pale:#e7ede9;
+    --ink:#233129;
+    --line:#d8cfb8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Jost',sans-serif;
+    font-weight:300;
+    line-height:1.6;
+  }
+  h1,h2,h3,.display{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    color:var(--dark-green);
+    letter-spacing:.01em;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px 80px;}
+
+  /* header */
+  header.top{
+    background:linear-gradient(180deg,var(--dark-green) 0%,var(--green-soft) 100%);
+    color:var(--cream);
+    padding:56px 24px 40px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  header.top::after{
+    content:"";
+    position:absolute;
+    left:50%;top:-120px;
+    width:520px;height:520px;
+    transform:translateX(-50%);
+    border:1px solid rgba(201,168,76,.18);
+    border-radius:50%;
+  }
+  header.top .eyebrow{
+    font-family:'Jost',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.22em;
+    font-size:12px;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  header.top h1{
+    color:#fff;
+    font-size:44px;
+    margin:0 0 12px;
+    position:relative;
+  }
+  header.top p{
+    max-width:560px;
+    margin:0 auto;
+    color:rgba(247,244,236,.85);
+    font-size:16px;
+    position:relative;
+  }
+
+  /* nav */
+  nav.tabs{
+    display:flex;
+    justify-content:center;
+    gap:4px;
+    flex-wrap:wrap;
+    margin:-24px auto 44px;
+    max-width:820px;
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px;
+    position:relative;
+    z-index:2;
+    box-shadow:0 8px 24px rgba(45,74,62,.08);
+  }
+  nav.tabs button{
+    font-family:'Jost',sans-serif;
+    font-size:13px;
+    letter-spacing:.03em;
+    background:none;
+    border:none;
+    padding:10px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    color:var(--green-soft);
+    transition:.2s;
+  }
+  nav.tabs button.active{
+    background:var(--dark-green);
+    color:#fff;
+  }
+  nav.tabs button:hover:not(.active){background:var(--green-pale);}
+
+  section.panel{display:none;}
+  section.panel.active{display:block; animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  .section-title{text-align:center; margin-bottom:8px;}
+  .section-title h2{font-size:32px; margin:0 0 8px;}
+  .section-title p{color:var(--green-soft); max-width:560px; margin:0 auto 36px; font-size:15px;}
+
+  /* start */
+  .intro-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:28px;}
+  @media(max-width:640px){.intro-grid{grid-template-columns:1fr;}}
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 24px;
+  }
+  .card h3{font-size:20px; margin:0 0 10px;}
+  .card p{font-size:14.5px; color:#4a4a42; margin:0;}
+  .stap{
+    display:flex; gap:14px; align-items:flex-start;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .stap:last-child{border-bottom:none;}
+  .stap .nr{
+    font-family:'Cormorant Garamond',serif;
+    font-size:26px;
+    color:var(--gold);
+    width:34px;
+    flex-shrink:0;
+  }
+  .stap h4{margin:0 0 4px; font-size:16px; color:var(--dark-green); font-weight:500;}
+  .stap p{margin:0; font-size:14px; color:#4a4a42;}
+
+  /* type & authority cards */
+  .grid-cards{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.grid-cards{grid-template-columns:1fr;}}
+  .flip-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 22px;
+    cursor:pointer;
+    transition:.2s;
+  }
+  .flip-card:hover{border-color:var(--gold);}
+  .flip-card .row1{display:flex; justify-content:space-between; align-items:center;}
+  .flip-card h3{font-size:19px; margin:0;}
+  .pct{font-size:12px; color:var(--gold); font-family:'Jost',sans-serif;}
+  .flip-card .detail{display:none; margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;}
+  .flip-card.open .detail{display:block;}
+  .flip-card .label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold); margin:10px 0 3px;}
+  .flip-card .label:first-of-type{margin-top:0;}
+  .flip-card .txt{font-size:14px; color:#4a4a42; margin:0;}
+  .toggle-hint{font-size:12px; color:#9a9384;}
+
+  /* bodygraph */
+  .bg-wrap{display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:flex-start;}
+  @media(max-width:700px){.bg-wrap{grid-template-columns:1fr;}}
+  #bodygraph{width:100%; height:auto; display:block;}
+  .center-shape{cursor:pointer; transition:.15s;}
+  .center-shape:hover{opacity:.75;}
+  .center-shape.selected{stroke:var(--gold); stroke-width:3;}
+  .bg-label{
+    font-family:'Jost',sans-serif;
+    font-size:10.5px;
+    fill:var(--dark-green);
+    text-anchor:middle;
+    pointer-events:none;
+  }
+  .center-info{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px;
+    min-height:220px;
+  }
+  .center-info h3{margin:0 0 4px; font-size:22px;}
+  .center-info .sub{color:var(--gold); font-size:13px; margin-bottom:16px;}
+  .state-toggle{display:flex; gap:8px; margin-bottom:16px;}
+  .state-toggle button{
+    flex:1;
+    font-family:'Jost',sans-serif; font-size:13px;
+    padding:9px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--cream); cursor:pointer; color:var(--ink);
+  }
+  .state-toggle button.active{background:var(--dark-green); color:#fff; border-color:var(--dark-green);}
+  .center-info p{font-size:14.5px; color:#4a4a42; margin:0 0 10px;}
+  .center-info .tip{
+    background:var(--green-pale); border-radius:10px; padding:12px 14px; font-size:13.5px; color:var(--green-soft);
+  }
+  .placeholder{color:#9a9384; font-size:14px; font-style:italic;}
+
+  /* mijn kaart */
+  .form-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px; margin-bottom:24px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:13px; color:var(--dark-green); margin-bottom:6px; font-weight:500;}
+  .field select, .field input[type=text]{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    font-family:'Jost',sans-serif; font-size:14px; background:var(--cream); color:var(--ink);
+  }
+  .btn{
+    background:var(--dark-green); color:#fff; border:none; padding:13px 26px;
+    border-radius:999px; font-family:'Jost',sans-serif; font-size:14px; letter-spacing:.02em;
+    cursor:pointer; transition:.2s;
+  }
+  .btn:hover{background:var(--green-soft);}
+  .btn.secondary{background:none; border:1px solid var(--dark-green); color:var(--dark-green);}
+  .result-card{
+    background:linear-gradient(180deg,var(--dark-green),var(--green-soft));
+    color:#fff; border-radius:16px; padding:32px; display:none;
+  }
+  .result-card.show{display:block; animation:fade .4s ease;}
+  .result-card h3{color:var(--gold); font-size:14px; text-transform:uppercase; letter-spacing:.14em; margin:0 0 6px; font-weight:400; font-family:'Jost',sans-serif;}
+  .result-card .naam{font-size:28px; color:#fff; margin:0 0 18px;}
+  .result-card .blok{margin-bottom:16px;}
+  .result-card .blok .k{font-size:12px; color:var(--gold); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;}
+  .result-card .blok .v{font-size:15px; color:rgba(255,255,255,.92);}
+  .result-actions{margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;}
+  .result-actions button{
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3); color:#fff;
+    padding:9px 18px; border-radius:999px; font-family:'Jost',sans-serif; font-size:13px; cursor:pointer;
+  }
+  .result-actions button:hover{background:rgba(255,255,255,.22);}
+  footer{text-align:center; padding:30px 24px 10px; font-size:12px; color:#9a9384;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Praktijk Confident · kennistool</div>
+  <h1>Human Design, helder en toepasbaar</h1>
+  <p>Geen jargon, geen ingewikkelde diagrammen. Bereken je type en autoriteit op basis van je geboortegegevens, en ontdek wat je daar morgen mee doet.</p>
+</header>
+
+<div class="wrap">
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="start">Start</button>
+    <button class="tab-btn" data-tab="bereken">Bereken je type</button>
+    <button class="tab-btn" data-tab="types">Jouw type</button>
+    <button class="tab-btn" data-tab="autoriteit">Autoriteit</button>
+    <button class="tab-btn" data-tab="centra">Centra</button>
+    <button class="tab-btn" data-tab="poorten">Poorten &amp; profiel</button>
+    <button class="tab-btn" data-tab="kaart">Mijn toepaskaart</button>
+  </nav>
+
+  <!-- START -->
+  <section class="panel active" id="panel-start">
+    <div class="section-title">
+      <h2>Wat is Human Design</h2>
+      <p>Human Design is een systeem dat vertelt hoe jouw energie werkt: hoe je het beste beslissingen neemt, waar je van nature goed in bent, en wanneer je moe wordt van dingen die niet bij je passen. Het is gebaseerd op de precieze stand van de planeten op het moment dat je geboren bent. De taal eromheen zit vol vaktermen. Deze tool haalt die eruit en legt uit wat je ermee kunt.</p>
+    </div>
+
+    <div class="intro-grid">
+      <div class="card">
+        <h3>Wat je hier vindt</h3>
+        <div class="stap"><span class="nr">1</span><div><h4>Bereken je type</h4><p>Vul je geboortegegevens in en ontdek direct je type, autoriteit en profiel.</p></div></div>
+        <div class="stap"><span class="nr">2</span><div><h4>Jouw type</h4><p>De vijf energietypes en de strategie die daarbij hoort, in gewone taal.</p></div></div>
+        <div class="stap"><span class="nr">3</span><div><h4>Autoriteit</h4><p>Hoe je lichaam je eigenlijk al vertelt wat een goed besluit is.</p></div></div>
+        <div class="stap"><span class="nr">4</span><div><h4>Centra &amp; poorten</h4><p>Vereenvoudigde uitleg van de negen centra, de poorten, kanalen en profielen.</p></div></div>
+        <div class="stap"><span class="nr">5</span><div><h4>Mijn toepaskaart</h4><p>Vul in wat je weet over jezelf en krijg een persoonlijke, praktische samenvatting.</p></div></div>
+      </div>
+      <div class="card">
+        <h3>Hoe vraag je je eigen chart op</h3>
+        <p style="margin-bottom:14px;">Heb je je geboortedatum, geboortetijd en geboorteplaats bij de hand? Ga naar het tabblad <strong>Bereken je type</strong>. Op basis daarvan wordt de precieze stand van de planeten op je geboortemoment berekend, en daaruit volgen je type, autoriteit en profiel.</p>
+        <p style="margin-bottom:14px;">Weet je je geboortetijd niet precies? Een paar minuten verschil kan de uitkomst beïnvloeden. Je geboortetijd staat vaak op je geboortebewijs, of is op te vragen bij de instantie waar je geboren bent.</p>
+        <p>Deze tool geeft een goede, praktische inschatting. Voor een uitgebreide officiële reading kun je terecht bij mij in de praktijk. Neem contact op via <a href="mailto:info@praktijkconfident.nl" style="color:var(--dark-green);">info@praktijkconfident.nl</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPES -->
+  <section class="panel" id="panel-types">
+    <div class="section-title">
+      <h2>De vijf energietypes</h2>
+      <p>Je type zegt iets over hoe jouw energie werkt en hoe je die het beste inzet. Klik op een kaart voor de volledige uitleg.</p>
+    </div>
+    <div class="grid-cards" id="types-grid"></div>
+  </section>
+
+  <!-- BEREKEN JE TYPE -->
+  <section class="panel" id="panel-bereken">
+    <div class="section-title">
+      <h2>Bereken je type</h2>
+      <p>Vul je naam en geboortegegevens in. De tool berekent de stand van de planeten op je geboortemoment en zet dat om naar je type, autoriteit en profiel.</p>
+    </div>
+
+    <div class="form-card">
+      <div class="field">
+        <label for="bc-naam">Voornaam</label>
+        <input type="text" id="bc-naam" placeholder="Bijvoorbeeld: Sandra">
+      </div>
+      <div class="field">
+        <label for="bc-datum">Geboortedatum</label>
+        <input type="date" id="bc-datum">
+      </div>
+      <div class="field">
+        <label for="bc-tijd">Geboortetijd (zo precies mogelijk)</label>
+        <input type="time" id="bc-tijd">
+      </div>
+      <div class="field">
+        <label for="bc-plaats">Geboorteplaats</label>
+        <input type="text" id="bc-plaats" placeholder="Bijvoorbeeld: Oisterwijk">
+      </div>
+      <div class="field">
+        <label for="bc-tijdzone">Tijdzone van de geboorteplaats</label>
+        <select id="bc-tijdzone"></select>
+      </div>
+      <button class="btn" id="bc-bereken-btn">Bereken mijn type</button>
+      <p style="font-size:12.5px; color:#9a9384; margin:14px 0 0;">Deze berekening gebruikt de werkelijke planeetstand op je geboortemoment. Bij een twijfelachtige geboortetijd kan de uitkomst iets afwijken, vraag bij twijfel je exacte geboortetijd op.</p>
+    </div>
+
+    <div class="result-card" id="bc-result">
+      <h3>Jouw ontwerp</h3>
+      <p class="naam" id="bc-result-naam">-</p>
+      <div class="blok"><div class="k">Type</div><div class="v" id="bc-result-type"></div></div>
+      <div class="blok"><div class="k">Autoriteit</div><div class="v" id="bc-result-auth"></div></div>
+      <div class="blok"><div class="k">Profiel</div><div class="v" id="bc-result-profile"></div></div>
+      <div class="blok"><div class="k">Gedefinieerde centra</div><div class="v" id="bc-result-centers"></div></div>
+      <div class="result-actions">
+        <button id="bc-naar-toepaskaart">Bekijk toepaskaart voor dit type</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTORITEIT -->
+  <section class="panel" id="panel-autoriteit">
+    <div class="section-title">
+      <h2>Jouw autoriteit</h2>
+      <p>Je autoriteit is de plek in je lichaam waar betrouwbare besluiten vandaan komen, niet uit je hoofd. Klik op een kaart voor de volledige uitleg.</p>
+    </div>
+    <div class="grid-cards" id="auth-grid"></div>
+  </section>
+
+  <!-- CENTRA -->
+  <section class="panel" id="panel-centra">
+    <div class="section-title">
+      <h2>De negen centra</h2>
+      <p>Elk centrum is een gebied van je leven. Is een centrum gedefinieerd, dan werkt het bij jou constant. Is het open, dan ben je daar wijs en gevoelig voor de energie van anderen. Klik op een vorm in het schema.</p>
+    </div>
+    <div class="bg-wrap">
+      <svg id="bodygraph" viewBox="0 0 280 520" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="center-info" id="center-info">
+        <p class="placeholder">Klik op een vorm in het schema om te lezen wat dat centrum betekent, gedefinieerd of open.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- POORTEN & PROFIEL -->
+  <section class="panel" id="panel-poorten">
+    <div class="section-title">
+      <h2>Poorten, kanalen &amp; profiel</h2>
+      <p>De laatste laag jargon, in gewone taal: wat poorten en kanalen precies zijn, hoe lijnen werken, en welk profiel daaruit ontstaat.</p>
+    </div>
+
+    <div class="intro-grid" style="margin-bottom:36px;">
+      <div class="card">
+        <h3>Wat is een poort</h3>
+        <p>Elke poort is een van de 64 thema's in je ontwerp, zoals nieuwsgierigheid, leiderschap of gevoeligheid. Een poort wordt bij jou actief wanneer een planeet op je geboortemoment (of ongeveer 88 dagen daarvoor) in het bijbehorende stukje van de dierenriem stond. De meeste mensen hebben tussen de 20 en 30 actieve poorten.</p>
+      </div>
+      <div class="card">
+        <h3>Wat is een kanaal</h3>
+        <p>Twee poorten die tegenover elkaar liggen vormen samen een kanaal, en verbinden daarmee twee centra met elkaar. Heb jij beide poorten van zo'n kanaal, dan is het gedefinieerd en werkt die energie constant en betrouwbaar in jou. Er zijn in totaal 36 kanalen, elk met een eigen thema.</p>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2 style="font-size:26px;">De zes lijnen</h2>
+      <p>Elke poort heeft 6 lijnen. De lijn van je Zon geeft, samen met de lijn van je Zon 88 dagen voor je geboorte, je profiel: de rol die je van nature speelt in het leven.</p>
+    </div>
+    <div class="grid-cards" id="lines-grid" style="margin-bottom:36px;"></div>
+
+    <div class="section-title">
+      <h2 style="font-size:26px;">De twaalf profielen</h2>
+      <p>Je profiel bestaat uit twee lijnen: de eerste is bewust (hoe je jezelf ervaart), de tweede onbewust (hoe anderen je vaak zien). Klik voor de betekenis.</p>
+    </div>
+    <div class="grid-cards" id="profiles-grid"></div>
+  </section>
+
+  <!-- MIJN KAART -->
+  <section class="panel" id="panel-kaart">
+    <div class="section-title">
+      <h2>Mijn toepaskaart</h2>
+      <p>Vul in wat je van jezelf weet en krijg een persoonlijke, praktische samenvatting die je kunt bewaren.</p>
+    </div>
+
+    <div class="form-card">
+      <div class="field">
+        <label for="naam-input">Voornaam (optioneel)</label>
+        <input type="text" id="naam-input" placeholder="Bijvoorbeeld: Sandra">
+      </div>
+      <div class="field">
+        <label for="type-select">Mijn type</label>
+        <select id="type-select"></select>
+      </div>
+      <div class="field">
+        <label for="auth-select">Mijn autoriteit</label>
+        <select id="auth-select"></select>
+      </div>
+      <button class="btn" id="maak-kaart">Maak mijn toepaskaart</button>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <h3>Toepaskaart van</h3>
+      <p class="naam" id="result-naam">-</p>
+      <div class="blok"><div class="k">Strategie</div><div class="v" id="result-strategie"></div></div>
+      <div class="blok"><div class="k">Let op bij</div><div class="v" id="result-nietzelf"></div></div>
+      <div class="blok"><div class="k">Zo neem je besluiten</div><div class="v" id="result-autoriteit"></div></div>
+      <div class="blok"><div class="k">Vandaag toepasbaar</div><div class="v" id="result-tip"></div></div>
+      <div class="result-actions">
+        <button id="print-btn">Afdrukken</button>
+        <button id="copy-btn">Kopieer tekst</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Praktijk Confident &middot; een hulpmiddel om je eigen ontwerp beter te leren begrijpen, geen vervanging voor een volledige reading.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script>
+const TYPES = [
+  {
+    id:"generator",
+    naam:"Generator",
+    pct:"~37%",
+    strategie:"Reageren. Wacht tot iets of iemand in je leven verschijnt om op te reageren, dan volgt je lijf vanzelf of het klopt.",
+    nietzelf:"Frustratie, als je zelf initiatief neemt in plaats van te reageren, of te lang blijft hangen in iets dat geen energie meer geeft.",
+    herkenbaar:"Je hebt veel doe-energie zodra iets je aanspreekt, maar merkt dat initiatief nemen zonder duidelijke aanleiding niet lekker werkt.",
+    tip:"Stel jezelf ja/nee vragen in plaats van open vragen, en luister naar het geluid of gevoel dat vanzelf komt."
+  },
+  {
+    id:"mg",
+    naam:"Manifesterende Generator",
+    pct:"~33%",
+    strategie:"Reageren, en daarna informeren wie het aangaat voordat je in actie komt. Zo mis je geen stappen.",
+    nietzelf:"Frustratie en soms boosheid, als je stappen overslaat of te veel tegelijk vasthoudt.",
+    herkenbaar:"Je bent snel, springt makkelijk tussen dingen en hebt weinig geduld met trage processen.",
+    tip:"Informeren is geen toestemming vragen. Het is anderen op tijd meenemen, zodat jij niet vastloopt op weerstand die je had kunnen voorkomen."
+  },
+  {
+    id:"projector",
+    naam:"Projector",
+    pct:"~20%",
+    strategie:"Wachten op een uitnodiging voor de grote dingen: werk, relaties, erkenning.",
+    nietzelf:"Bitterheid, als je energie steekt in dingen die niet gezien of gewaardeerd worden.",
+    herkenbaar:"Je ziet mensen en systemen helder aan, raakt sneller vermoeid van langdurige fysieke inzet, en bent gevoelig voor erkenning.",
+    tip:"Bouw rust in vóórdat je moe bent. Deel je inzichten pas als er echt om gevraagd wordt, dan landen ze ook beter."
+  },
+  {
+    id:"manifestor",
+    naam:"Manifestor",
+    pct:"~9%",
+    strategie:"Informeren voordat je iets doet, zodat mensen om je heen niet overvallen worden.",
+    nietzelf:"Boosheid, als je tegengehouden wordt of het informeren overslaat.",
+    herkenbaar:"Je bent een initiatiefnemer die het liefst zelfstandig werkt, en kunt onbedoeld weerstand oproepen bij anderen.",
+    tip:"Informeren voelt in het begin kwetsbaar, maar maakt je pad juist rustiger. Mensen voelen zich minder overvallen en werken makkelijker mee."
+  },
+  {
+    id:"reflector",
+    naam:"Reflector",
+    pct:"~1%",
+    strategie:"Een volledige maancyclus, ongeveer 28 dagen, de tijd nemen voor grote besluiten.",
+    nietzelf:"Teleurstelling, als je jezelf onder druk zet om snel te beslissen.",
+    herkenbaar:"Je neemt de sfeer van je omgeving sterk over en voelt je van dag tot dag anders, wat een gevoelig kompas is voor gezonde plekken en mensen.",
+    tip:"Omring jezelf bewust met mensen en plekken die je goed doen. Dat kleurt letterlijk mee in hoe jij je voelt."
+  }
+];
+
+const AUTH = [
+  {
+    id:"emotioneel",
+    naam:"Emotioneel",
+    wat:"Jouw gevoel beweegt in golven, van hoog naar laag en weer terug. Er is geen emotionele waarheid op één moment.",
+    praktisch:"Neem geen definitief besluit op een piek of een dal. Wacht tot de golf tot rust komt, dat kan uren tot een paar dagen duren.",
+    zin:"Ik weet het antwoord pas als ik er een nacht over geslapen heb."
+  },
+  {
+    id:"sacraal",
+    naam:"Sacraal",
+    wat:"Je lijf reageert direct met een ja of nee gevoel in je buik, nog voor je hoofd erover nadenkt.",
+    praktisch:"Stel jezelf ja/nee vragen hardop en luister naar het geluid of gevoel dat spontaan komt.",
+    zin:"Mijn buik weet het eerder dan mijn hoofd."
+  },
+  {
+    id:"milt",
+    naam:"Milt",
+    wat:"Een stille, directe intuïtie die in het nu spreekt, en zich niet herhaalt.",
+    praktisch:"Dit signaal fluistert maar één keer. Oefen om er meteen naar te handelen, in plaats van het weg te redeneren.",
+    zin:"Ik voelde meteen dat het niet klopte, maar kon het niet uitleggen."
+  },
+  {
+    id:"ego",
+    naam:"Ego / hart",
+    wat:"Besluiten komen voort uit wilskracht en wat jij daadwerkelijk wilt, niet uit wat zou moeten.",
+    praktisch:"Vraag jezelf 'wil ik dit echt' in plaats van 'moet ik dit', en spreek je wil hardop uit.",
+    zin:"Als ik het wil, kan ik het ook waarmaken."
+  },
+  {
+    id:"zelfgeprojecteerd",
+    naam:"Zelf-geprojecteerd",
+    wat:"Helderheid ontstaat door hardop te praten, niet door in je hoofd te blijven denken.",
+    praktisch:"Zoek een luisterend oor en praat je besluit uit. Let op je eigen stem en toon terwijl je praat, daar zit het antwoord.",
+    zin:"Ik hoor pas wat ik echt vind als ik het uitspreek."
+  },
+  {
+    id:"mentaal",
+    naam:"Mentaal (omgeving)",
+    wat:"Je hebt geen innerlijke autoriteit in je lijf, maar bent gemaakt om helderheid te vinden in gesprek en omgeving.",
+    praktisch:"Praat je besluit door met verschillende mensen zonder hun advies over te nemen, en voel welke omgeving je het rustigst maakt.",
+    zin:"In het ene gezelschap voel ik me helder, in het andere verward."
+  },
+  {
+    id:"maan",
+    naam:"Maan (Reflectors)",
+    wat:"Helderheid komt pas na een volledige maancyclus van ervaren en voelen.",
+    praktisch:"Geef jezelf bij grote besluiten letterlijk de tijd van de maan, en praat elke dag met iemand anders over het onderwerp.",
+    zin:"Wat ik vandaag voel is niet per se wat ik morgen voel, en dat is oké."
+  }
+];
+
+const CENTERS = [
+  {id:"kruin", naam:"Hoofd", thema:"Inspiratie en denkdruk", x:140, y:35, shape:"triangle-down", w:46,
+    gedefinieerd:"Jij bent een constante bron van inspiratie en vragen voor anderen. Er zijn vaste thema's waar jij steeds opnieuw over nadenkt.",
+    open:"Jij neemt makkelijk de vragen en denkdruk van anderen over. Dat voelt als mentale onrust die eigenlijk niet van jou is.",
+    tip:"Vraag jezelf bij drukke gedachten: is dit mijn vraag, of die van een ander?"},
+  {id:"ajna", naam:"Ajna", thema:"Manier van denken", x:140, y:100, shape:"triangle-down", w:50,
+    gedefinieerd:"Jij hebt een vaste, herkenbare manier van denken en vormt makkelijk een mening.",
+    open:"Jij kunt van alle kanten denken en meningen van anderen proberen, waardoor een eigen mening vasthouden lastig kan zijn.",
+    tip:"Geef jezelf toestemming om 'ik weet het nog niet' te zeggen."},
+  {id:"keel", naam:"Keel", thema:"Communicatie en actie", x:140, y:170, shape:"square", w:52,
+    gedefinieerd:"Jij hebt een consistente manier waarop je jezelf uit en dingen voor elkaar krijgt.",
+    open:"Jij bent gevoelig voor de behoefte om gehoord te worden, en kunt gaan praten om aandacht te krijgen.",
+    tip:"Check voor je spreekt of het al uit je strategie en autoriteit komt, of uit de behoefte om iets te zeggen."},
+  {id:"g", naam:"Identiteitscentrum", thema:"Identiteit en richting", x:140, y:240, shape:"diamond", w:56,
+    gedefinieerd:"Jij hebt een stabiel gevoel van wie je bent en waar je naartoe gaat.",
+    open:"Jouw gevoel van identiteit en richting kan meebewegen met de omgeving en de mensen om je heen.",
+    tip:"Een vaste plek, ritme of gewoonte geeft jou houvast in wie je bent."},
+  {id:"hart", naam:"Hart (ego)", thema:"Wilskracht en eigenwaarde", x:205, y:240, shape:"triangle-right", w:38,
+    gedefinieerd:"Jij kunt makkelijk beloftes maken en jezelf bewijzen wanneer dat nodig is.",
+    open:"Jij kunt druk voelen om je waarde te bewijzen of afspraken te maken die eigenlijk niet bij je passen.",
+    tip:"Je hoeft jezelf niets te bewijzen. Rust nemen is ook een geldig antwoord."},
+  {id:"milt", naam:"Milt", thema:"Intuïtie en gezondheid", x:75, y:305, shape:"triangle-left", w:46,
+    gedefinieerd:"Jij hebt toegang tot een stille, directe intuïtie over wat goed en veilig voor je is.",
+    open:"Jij kunt gevoelig zijn voor angst en zorgen die niet van jou zijn, of juist over je eigen grenzen heen gaan.",
+    tip:"Geef signalen van je lijf serieuze aandacht, ook de hele zachte."},
+  {id:"solar", naam:"Solar plexus", thema:"Gevoel en sfeer", x:205, y:305, shape:"triangle-right", w:46,
+    gedefinieerd:"Jij hebt een eigen emotionele golfbeweging, met pieken en dalen die van jou zijn.",
+    open:"Jij neemt makkelijk de emoties en sfeer van anderen over, alsof het je eigen gevoelens zijn.",
+    tip:"Vraag jezelf in een drukke ruimte: is dit mijn emotie, of voel ik die van een ander?"},
+  {id:"sacraal", naam:"Sacraal", thema:"Levensenergie", x:140, y:355, shape:"square", w:52,
+    gedefinieerd:"Jij hebt een constante bron van energie voor werk dat bij je past.",
+    open:"Jij kunt moeite hebben met grenzen aan werk en energie, en te lang doorgaan voor je het doorhebt.",
+    tip:"Neem rust voordat je moe bent, niet pas erna."},
+  {id:"wortel", naam:"Wortel", thema:"Druk en drive", x:140, y:430, shape:"square", w:52,
+    gedefinieerd:"Jij hebt een gestage druk in je systeem die je in beweging zet.",
+    open:"Jij kunt gevoelig zijn voor de haast en stress van anderen om je heen.",
+    tip:"Vertraag bewust wanneer je haast voelt die niet logisch aanvoelt, dat is vaak niet jouw haast."}
+];
+
+const LINES = [
+  {nr:"1", naam:"Onderzoeker", thema:"Fundament en zekerheid", omschrijving:"Jij hebt een diepe behoefte aan een stevig fundament. Je voelt je op je best als je een onderwerp grondig hebt onderzocht en echt begrijpt hoe iets werkt.", tip:"Geef jezelf de tijd om dingen uit te zoeken voor je je ergens aan verbindt, dat is geen aarzelen maar hoe jij zekerheid opbouwt."},
+  {nr:"2", naam:"Kluizenaar", thema:"Natuurlijk talent", omschrijving:"Jij hebt van nature talent voor bepaalde dingen, vaak zonder dat je het zelf zo bijzonder vindt. Je hebt afwisseling nodig tussen alleen zijn en uitgenodigd worden.", tip:"Bescherm je tijd alleen, dat is waar je talent zich oplaadt, niet waar je aan het verstoppen bent."},
+  {nr:"3", naam:"Martelaar", thema:"Leren door ervaring", omschrijving:"Jij leert het beste door te doen, te proberen en soms tegen iets aan te lopen. Wat niet werkt is voor jou net zo waardevolle informatie als wat wel werkt.", tip:"Zie een misstap niet als falen, maar als het bewijsmateriaal dat jij nodig had om verder te komen."},
+  {nr:"4", naam:"Opportunist", thema:"Netwerk en relaties", omschrijving:"Jouw kansen en mogelijkheden komen vooral via mensen die je al kent. Een hecht netwerk is voor jou geen bijzaak, het is de basis van hoe je vooruitkomt.", tip:"Investeer bewust in een paar goede, oprechte relaties in plaats van een groot los netwerk."},
+  {nr:"5", naam:"Ketter", thema:"Gezien worden als oplosser", omschrijving:"Anderen projecteren makkelijk verwachtingen op jou, ze zien in jou vaak iemand die iets voor hen kan oplossen, voor je zelf iets hebt gezegd of gedaan.", tip:"Wees praktisch en duidelijk over wat je wel en niet kunt bieden, dat voorkomt teleurstelling aan beide kanten."},
+  {nr:"6", naam:"Rolmodel", thema:"Voorbeeld door de tijd heen", omschrijving:"Jouw leven verloopt in fases: eerst onderzoeken en ervaren, dan een periode van terugtrekken en observeren, en daarna leven als een levend voorbeeld voor anderen.", tip:"Heb geduld met de terugtrekfase, die is geen stilstand maar de plek waar je wijsheid neerslaat."}
+];
+
+const PROFILES = [
+  {id:"1-3", naam:"1/3 · Onderzoeker / Martelaar", uitleg:"Bouwt zekerheid op via studie, en test die kennis vervolgens in de praktijk. Een wisselvallig pad dat leidt tot echte, zelf ervaren wijsheid."},
+  {id:"1-4", naam:"1/4 · Onderzoeker / Opportunist", uitleg:"Bouwt een fundament van kennis op, en deelt dat vervolgens via een klein, vertrouwd netwerk van mensen."},
+  {id:"2-4", naam:"2/4 · Kluizenaar / Opportunist", uitleg:"Heeft natuurlijk talent dat het beste tot bloei komt binnen een select netwerk, en moet daarvoor wel worden uitgenodigd."},
+  {id:"2-5", naam:"2/5 · Kluizenaar / Ketter", uitleg:"Een teruggetrokken talent dat van een afstand aantrekkingskracht heeft, anderen zien al snel een mogelijke oplosser in jou."},
+  {id:"3-5", naam:"3/5 · Martelaar / Ketter", uitleg:"Leert door vallen en opstaan, en wordt daarna door anderen gezien als een praktische probleemoplosser."},
+  {id:"3-6", naam:"3/6 · Martelaar / Rolmodel", uitleg:"Een leven vol ervaring en beproeving, dat na verloop van tijd uitgroeit tot een voorbeeldfunctie voor anderen."},
+  {id:"4-6", naam:"4/6 · Opportunist / Rolmodel", uitleg:"Bouwt via een hecht netwerk, en groeit na verloop van tijd uit tot een gezaghebbend voorbeeld voor die kring."},
+  {id:"4-1", naam:"4/1 · Opportunist / Onderzoeker", uitleg:"Een netwerk van vertrouwde mensen, gedragen door een stevig fundament van eigen kennis en onderzoek."},
+  {id:"5-1", naam:"5/1 · Ketter / Onderzoeker", uitleg:"Wordt door anderen gezien als de oplosser, met een grondig onderzocht fundament als stevige basis daaronder."},
+  {id:"5-2", naam:"5/2 · Ketter / Kluizenaar", uitleg:"Anderen projecteren verwachtingen op een van nature teruggetrokken talent, dat het beste werkt met genoeg tijd alleen."},
+  {id:"6-2", naam:"6/2 · Rolmodel / Kluizenaar", uitleg:"Een voorbeeldfunctie die rust op natuurlijk talent, met een blijvende behoefte aan periodes van rust en afzondering."},
+  {id:"6-3", naam:"6/3 · Rolmodel / Martelaar", uitleg:"Wijsheid die ontstaat door vallen en opstaan, en die uiteindelijk verandert in een levend voorbeeld voor anderen."}
+];
+
+function renderLines(){
+  const grid = document.getElementById('lines-grid');
+  grid.innerHTML = LINES.map(l => `
+    <div class="flip-card" data-id="${l.nr}">
+      <div class="row1"><h3>Lijn ${l.nr} &middot; ${l.naam}</h3></div>
+      <div class="toggle-hint">${l.thema} &middot; klik voor uitleg</div>
+      <div class="detail">
+        <div class="label">Wat het betekent</div><p class="txt">${l.omschrijving}</p>
+        <div class="label">Concrete tip</div><p class="txt">${l.tip}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderProfiles(){
+  const grid = document.getElementById('profiles-grid');
+  grid.innerHTML = PROFILES.map(p => `
+    <div class="flip-card" data-id="${p.id}">
+      <div class="row1"><h3>${p.naam}</h3></div>
+      <div class="toggle-hint">klik voor uitleg</div>
+      <div class="detail">
+        <p class="txt">${p.uitleg}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderTypes(){
+  const grid = document.getElementById('types-grid');
+  grid.innerHTML = TYPES.map(t => `
+    <div class="flip-card" data-id="${t.id}">
+      <div class="row1"><h3>${t.naam}</h3><span class="pct">${t.pct}</span></div>
+      <div class="toggle-hint">klik voor strategie en tips</div>
+      <div class="detail">
+        <div class="label">Strategie</div><p class="txt">${t.strategie}</p>
+        <div class="label">Niet-zelf thema</div><p class="txt">${t.nietzelf}</p>
+        <div class="label">Herkenbaar aan</div><p class="txt">${t.herkenbaar}</p>
+        <div class="label">Concrete tip</div><p class="txt">${t.tip}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderAuth(){
+  const grid = document.getElementById('auth-grid');
+  grid.innerHTML = AUTH.map(a => `
+    <div class="flip-card" data-id="${a.id}">
+      <div class="row1"><h3>${a.naam}</h3></div>
+      <div class="toggle-hint">klik voor uitleg en toepassing</div>
+      <div class="detail">
+        <div class="label">Wat het is</div><p class="txt">${a.wat}</p>
+        <div class="label">Praktisch</div><p class="txt">${a.praktisch}</p>
+        <div class="label">Herkenzin</div><p class="txt">"${a.zin}"</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function shapePath(c){
+  const {x,y,w,shape} = c;
+  const h = w * 0.95;
+  if(shape==="square"){
+    return `M${x-w/2},${y-h/2} L${x+w/2},${y-h/2} L${x+w/2},${y+h/2} L${x-w/2},${y+h/2} Z`;
+  }
+  if(shape==="diamond"){
+    return `M${x},${y-h/2} L${x+w/2},${y} L${x},${y+h/2} L${x-w/2},${y} Z`;
+  }
+  if(shape==="triangle-down"){
+    return `M${x-w/2},${y-h/2} L${x+w/2},${y-h/2} L${x},${y+h/2} Z`;
+  }
+  if(shape==="triangle-left"){
+    return `M${x+w/2},${y-h/2} L${x+w/2},${y+h/2} L${x-w/2},${y} Z`;
+  }
+  if(shape==="triangle-right"){
+    return `M${x-w/2},${y-h/2} L${x-w/2},${y+h/2} L${x+w/2},${y} Z`;
+  }
+}
+
+function renderBodygraph(){
+  const svg = document.getElementById('bodygraph');
+  const channels = [
+    [140,58,140,75],[140,125,140,144],[140,196,140,212],
+    [140,268,140,330],[140,268,188,255],[140,330,205,290],
+    [140,268,95,290],[140,380,140,404]
+  ];
+  let lines = channels.map(l=>`<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="var(--line)" stroke-width="2"/>`).join('');
+  let shapes = CENTERS.map(c => `
+    <g>
+      <path class="center-shape" data-id="${c.id}" d="${shapePath(c)}" fill="var(--green-pale)" stroke="var(--dark-green)" stroke-width="1.5"/>
+      <text class="bg-label" x="${c.x}" y="${c.y + (c.w*0.95)/2 + 14}">${c.naam}</text>
+    </g>`).join('');
+  svg.innerHTML = lines + shapes;
+  svg.querySelectorAll('.center-shape').forEach(shape=>{
+    shape.addEventListener('click', ()=> selectCenter(shape.dataset.id));
+  });
+}
+
+let currentCenter = null;
+let currentState = 'gedefinieerd';
+function selectCenter(id){
+  currentCenter = CENTERS.find(c=>c.id===id);
+  currentState = 'gedefinieerd';
+  document.querySelectorAll('.center-shape').forEach(s=>{
+    s.classList.toggle('selected', s.dataset.id===id);
+    s.setAttribute('fill', s.dataset.id===id ? 'var(--gold)' : 'var(--green-pale)');
+  });
+  renderCenterInfo();
+}
+function renderCenterInfo(){
+  const box = document.getElementById('center-info');
+  const c = currentCenter;
+  box.innerHTML = `
+    <h3>${c.naam}</h3>
+    <div class="sub">${c.thema}</div>
+    <div class="state-toggle">
+      <button data-s="gedefinieerd" class="${currentState==='gedefinieerd'?'active':''}">Gedefinieerd</button>
+      <button data-s="open" class="${currentState==='open'?'active':''}">Open</button>
+    </div>
+    <p>${currentState==='gedefinieerd' ? c.gedefinieerd : c.open}</p>
+    <div class="tip">${c.tip}</div>
+  `;
+  box.querySelectorAll('.state-toggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ currentState = btn.dataset.s; renderCenterInfo(); });
+  });
+}
+
+function renderSelects(){
+  const typeSel = document.getElementById('type-select');
+  const authSel = document.getElementById('auth-select');
+  typeSel.innerHTML = TYPES.map(t=>`<option value="${t.id}">${t.naam}</option>`).join('');
+  authSel.innerHTML = AUTH.map(a=>`<option value="${a.id}">${a.naam}</option>`).join('');
+}
+
+document.getElementById('maak-kaart').addEventListener('click', ()=>{
+  const t = TYPES.find(x=>x.id===document.getElementById('type-select').value);
+  const a = AUTH.find(x=>x.id===document.getElementById('auth-select').value);
+  const naam = document.getElementById('naam-input').value.trim() || 'jou';
+
+  document.getElementById('result-naam').textContent = `${t.naam} · autoriteit ${a.naam}`;
+  document.getElementById('result-strategie').textContent = t.strategie;
+  document.getElementById('result-nietzelf').textContent = t.nietzelf;
+  document.getElementById('result-autoriteit').textContent = `${a.praktisch} ("${a.zin}")`;
+  document.getElementById('result-tip').textContent = `${t.tip} ${a.naam !== 'Sacraal' ? '' : ''}`.trim();
+  document.querySelector('.result-card h3').textContent = `Toepaskaart van ${naam}`;
+
+  const card = document.getElementById('result-card');
+  card.classList.add('show');
+  card.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+document.getElementById('print-btn').addEventListener('click', ()=> window.print());
+document.getElementById('copy-btn').addEventListener('click', ()=>{
+  const c = document.getElementById('result-card');
+  const text = [...c.querySelectorAll('h3, .naam, .k, .v')].map(el=>el.textContent).join('\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copy-btn');
+    const old = btn.textContent;
+    btn.textContent = 'Gekopieerd';
+    setTimeout(()=> btn.textContent = old, 1500);
+  });
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===== Bereken je type: rekenkern ===== */
+
+const TIJDZONES = [
+  "Europe/Amsterdam","Europe/Brussels","Europe/London","Europe/Berlin","Europe/Paris",
+  "Europe/Madrid","Europe/Rome","Europe/Lisbon","Europe/Vienna","Europe/Warsaw",
+  "Europe/Bucharest","Europe/Athens","Europe/Istanbul","Europe/Moscow",
+  "America/New_York","America/Chicago","America/Denver","America/Los_Angeles",
+  "America/Sao_Paulo","America/Bogota","Africa/Johannesburg","Africa/Casablanca",
+  "Asia/Dubai","Asia/Kolkata","Asia/Bangkok","Asia/Jakarta","Asia/Shanghai","Asia/Tokyo",
+  "Australia/Sydney","Pacific/Auckland","UTC"
+];
+
+function renderTijdzones(){
+  const sel = document.getElementById('bc-tijdzone');
+  sel.innerHTML = TIJDZONES.map(tz=>`<option value="${tz}" ${tz==='Europe/Amsterdam'?'selected':''}>${tz.replace('_',' ')}</option>`).join('');
+}
+
+// De 64-poorten wolk: startpunt is Poort 25 op 358.25 graden (28 15' Vissen), elke poort 5.625 graden breed
+const GATE_SEQUENCE = [25,17,21,51,42,3,27,24,2,23,8,20,16,35,45,12,15,52,39,53,62,56,31,33,7,4,29,59,40,64,47,6,46,18,48,57,32,50,28,44,1,43,14,34,9,5,26,11,10,58,38,54,61,60,41,19,13,49,30,55,37,63,22,36];
+
+const GATE_CENTER = {
+  1:"g",2:"g",3:"sacraal",4:"ajna",5:"sacraal",6:"solar",7:"g",8:"keel",9:"sacraal",10:"g",
+  11:"ajna",12:"keel",13:"g",14:"sacraal",15:"g",16:"keel",17:"ajna",18:"milt",19:"wortel",20:"keel",
+  21:"hart",22:"solar",23:"keel",24:"ajna",25:"g",26:"hart",27:"sacraal",28:"milt",29:"sacraal",30:"solar",
+  31:"keel",32:"milt",33:"keel",34:"sacraal",35:"keel",36:"solar",37:"solar",38:"wortel",39:"wortel",40:"hart",
+  41:"wortel",42:"sacraal",43:"ajna",44:"milt",45:"keel",46:"g",47:"ajna",48:"milt",49:"solar",50:"milt",
+  51:"hart",52:"wortel",53:"wortel",54:"wortel",55:"solar",56:"keel",57:"milt",58:"wortel",59:"sacraal",60:"wortel",
+  61:"hoofd",62:"keel",63:"hoofd",64:"hoofd"
+};
+
+const CHANNELS = [
+  [1,8],[2,14],[3,60],[4,63],[5,15],[6,59],[7,31],[9,52],[10,20],[10,34],
+  [10,57],[11,56],[12,22],[13,33],[16,48],[17,62],[18,58],[19,49],[20,34],[20,57],
+  [21,45],[23,43],[24,61],[25,51],[26,44],[27,50],[28,38],[29,46],[30,41],[32,54],
+  [34,57],[35,36],[37,40],[39,55],[42,53],[47,64]
+];
+
+const MOTORS = ["hart","solar","sacraal","wortel"];
+
+function longitudeToGateLine(lonDeg){
+  const gateWidth = 360/64;
+  const lineWidth = gateWidth/6;
+  let adjusted = ((lonDeg - 358.25) % 360 + 360) % 360;
+  let idx = Math.floor(adjusted / gateWidth);
+  if(idx>63) idx = 63;
+  const withinGate = adjusted - idx*gateWidth;
+  let line = Math.floor(withinGate/lineWidth) + 1;
+  if(line>6) line = 6;
+  if(line<1) line = 1;
+  return {gate: GATE_SEQUENCE[idx], line};
+}
+
+function meanLunarNodeLongitude(astroTime){
+  const T = astroTime.tt / 36525.0;
+  let omega = 125.0445479 - 1934.1362891*T + 0.0020754*T*T + (T*T*T)/467441 - (T*T*T*T)/60616000;
+  return ((omega % 360) + 360) % 360;
+}
+
+function trueNorthNodeLongitude(astroTime){
+  const A = Astronomy;
+  let searchStart = A.MakeTime(new Date(astroTime.date.getTime() - 40*24*60*60*1000));
+  let cur = A.SearchMoonNode(searchStart);
+  let ascNodes = [];
+  for(let i=0;i<8;i++){
+    if(cur.kind === A.NodeEventKind.Ascending) ascNodes.push(cur);
+    cur = A.NextMoonNode(cur);
+  }
+  for(let i=0;i<ascNodes.length-1;i++){
+    if(ascNodes[i].time.tt <= astroTime.tt && astroTime.tt <= ascNodes[i+1].time.tt){
+      const t0 = ascNodes[i].time, t1 = ascNodes[i+1].time;
+      let l0 = geocentricEclipticLongitude(A.Body.Moon, t0);
+      let l1 = geocentricEclipticLongitude(A.Body.Moon, t1);
+      if(l1 > l0) l1 -= 360;
+      const frac = (astroTime.tt - t0.tt) / (t1.tt - t0.tt);
+      let result = l0 + (l1-l0)*frac;
+      return ((result%360)+360)%360;
+    }
+  }
+  return meanLunarNodeLongitude(astroTime);
+}
+
+function geocentricEclipticLongitude(body, astroTime){
+  const vec = Astronomy.GeoVector(body, astroTime, true);
+  return Astronomy.Ecliptic(vec).elon;
+}
+
+function bodyLongitudes(astroTime){
+  const A = Astronomy;
+  const sun = A.SunPosition(astroTime).elon;
+  const moon = geocentricEclipticLongitude(A.Body.Moon, astroTime);
+  const mercury = geocentricEclipticLongitude(A.Body.Mercury, astroTime);
+  const venus = geocentricEclipticLongitude(A.Body.Venus, astroTime);
+  const mars = geocentricEclipticLongitude(A.Body.Mars, astroTime);
+  const jupiter = geocentricEclipticLongitude(A.Body.Jupiter, astroTime);
+  const saturn = geocentricEclipticLongitude(A.Body.Saturn, astroTime);
+  const uranus = geocentricEclipticLongitude(A.Body.Uranus, astroTime);
+  const neptune = geocentricEclipticLongitude(A.Body.Neptune, astroTime);
+  const pluto = geocentricEclipticLongitude(A.Body.Pluto, astroTime);
+  const nnode = trueNorthNodeLongitude(astroTime);
+  const sun_ = ((sun%360)+360)%360;
+  return {
+    Sun: sun_, Earth: (sun_+180)%360, Moon: ((moon%360)+360)%360,
+    NNode: nnode, SNode: (nnode+180)%360,
+    Mercury: ((mercury%360)+360)%360, Venus: ((venus%360)+360)%360, Mars: ((mars%360)+360)%360,
+    Jupiter: ((jupiter%360)+360)%360, Saturn: ((saturn%360)+360)%360, Uranus: ((uranus%360)+360)%360,
+    Neptune: ((neptune%360)+360)%360, Pluto: ((pluto%360)+360)%360
+  };
+}
+
+function getOffsetMinutes(date, timeZone){
+  const dtf = new Intl.DateTimeFormat('en-US', {timeZone, hourCycle:'h23', year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const parts = dtf.formatToParts(date).reduce((acc,p)=>{ if(p.type!=='literal') acc[p.type]=parseInt(p.value,10); return acc;},{});
+  const asUTC = Date.UTC(parts.year, parts.month-1, parts.day, parts.hour, parts.minute, parts.second);
+  return (asUTC - date.getTime())/60000;
+}
+
+function localToUTCDate(dateStr, timeStr, timeZone){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const [hh,mm] = timeStr.split(':').map(Number);
+  let guess = new Date(Date.UTC(y, m-1, d, hh, mm, 0));
+  for(let i=0;i<3;i++){
+    const offsetMin = getOffsetMinutes(guess, timeZone);
+    guess = new Date(Date.UTC(y, m-1, d, hh, mm, 0) - offsetMin*60000);
+  }
+  return guess;
+}
+
+function buildActivations(astroTime){
+  const lon = bodyLongitudes(astroTime);
+  const activated = new Set();
+  const gateLines = {};
+  Object.keys(lon).forEach(body=>{
+    const gl = longitudeToGateLine(lon[body]);
+    activated.add(gl.gate);
+    gateLines[body] = gl;
+  });
+  return {activated, gateLines};
+}
+
+function determineDesign(astroTime){
+  const A = Astronomy;
+  const birthSunLon = A.SunPosition(astroTime).elon;
+  const targetLon = ((birthSunLon - 88) % 360 + 360) % 360;
+  const searchStart = A.MakeTime(new Date(astroTime.date.getTime() - 100*24*60*60*1000));
+  const found = A.SearchSunLongitude(targetLon, searchStart, 100);
+  return found;
+}
+
+function calculateChart(naam, datum, tijd, timeZone){
+  const birthDate = localToUTCDate(datum, tijd, timeZone);
+  const birthTime = Astronomy.MakeTime(birthDate);
+  const designTime = determineDesign(birthTime);
+
+  const personality = buildActivations(birthTime);
+  const design = buildActivations(designTime);
+
+  const activatedGates = new Set([...personality.activated, ...design.activated]);
+
+  // gedefinieerde kanalen en centra
+  const definedCenters = new Set();
+  const edges = [];
+  CHANNELS.forEach(([a,b])=>{
+    if(activatedGates.has(a) && activatedGates.has(b)){
+      const ca = GATE_CENTER[a], cb = GATE_CENTER[b];
+      definedCenters.add(ca);
+      definedCenters.add(cb);
+      edges.push([ca,cb]);
+    }
+  });
+
+  function isConnected(start, end){
+    if(start===end) return true;
+    const adjacency = {};
+    edges.forEach(([x,y])=>{
+      (adjacency[x] = adjacency[x]||[]).push(y);
+      (adjacency[y] = adjacency[y]||[]).push(x);
+    });
+    const visited = new Set([start]);
+    const queue = [start];
+    while(queue.length){
+      const cur = queue.shift();
+      (adjacency[cur]||[]).forEach(next=>{
+        if(!visited.has(next)){
+          visited.add(next);
+          queue.push(next);
+        }
+      });
+    }
+    return visited.has(end);
+  }
+
+  // type
+  let type;
+  if(definedCenters.has('sacraal')){
+    type = isConnected('sacraal','keel') ? 'mg' : 'generator';
+  } else {
+    const motorToKeel = MOTORS.some(m=> definedCenters.has(m) && isConnected(m,'keel'));
+    if(motorToKeel) type = 'manifestor';
+    else if(definedCenters.size>0) type = 'projector';
+    else type = 'reflector';
+  }
+
+  // autoriteit
+  let authority;
+  if(definedCenters.has('solar')) authority = 'emotioneel';
+  else if(definedCenters.has('sacraal')) authority = 'sacraal';
+  else if(definedCenters.has('milt')) authority = 'milt';
+  else if(definedCenters.has('hart')) authority = 'ego';
+  else if(definedCenters.has('g')) authority = 'zelfgeprojecteerd';
+  else if(definedCenters.size===0) authority = 'maan';
+  else authority = 'mentaal';
+
+  // profiel: zon persoonlijkheid / zon design
+  const profile = `${personality.gateLines.Sun.line}/${design.gateLines.Sun.line}`;
+
+  const centerNamen = {hoofd:"Hoofd", ajna:"Ajna", keel:"Keel", g:"Identiteitscentrum", hart:"Hart (ego)", milt:"Milt", sacraal:"Sacraal", solar:"Solar plexus", wortel:"Wortel"};
+  const definedCenterNamen = [...definedCenters].map(c=>centerNamen[c]);
+
+  return {naam, type, authority, profile, definedCenterNamen};
+}
+
+document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
+  const naam = document.getElementById('bc-naam').value.trim() || 'jou';
+  const datum = document.getElementById('bc-datum').value;
+  const tijd = document.getElementById('bc-tijd').value;
+  const tijdzone = document.getElementById('bc-tijdzone').value;
+  const btn = document.getElementById('bc-bereken-btn');
+
+  if(!datum || !tijd){
+    alert('Vul een geboortedatum en geboortetijd in.');
+    return;
+  }
+
+  const oldLabel = btn.textContent;
+  btn.textContent = 'Berekenen...';
+  btn.disabled = true;
+
+  setTimeout(()=>{
+    try{
+      const result = calculateChart(naam, datum, tijd, tijdzone);
+      const typeInfo = TYPES.find(t=>t.id===result.type);
+      const authInfo = AUTH.find(a=>a.id===result.authority);
+
+      document.getElementById('bc-result-naam').textContent = naam;
+      document.getElementById('bc-result-type').textContent = typeInfo.naam;
+      document.getElementById('bc-result-auth').textContent = authInfo.naam;
+      document.getElementById('bc-result-profile').textContent = `Profiel ${result.profile}`;
+      document.getElementById('bc-result-centers').textContent = result.definedCenterNamen.length ? result.definedCenterNamen.join(', ') : 'geen (Reflector)';
+
+      document.getElementById('type-select').value = typeInfo.id;
+      document.getElementById('auth-select').value = authInfo.id;
+
+      document.getElementById('bc-result').classList.add('show');
+      document.getElementById('bc-result').scrollIntoView({behavior:'smooth', block:'nearest'});
+    }catch(err){
+      alert('Er ging iets mis bij het berekenen. Controleer de ingevulde gegevens en probeer het opnieuw.');
+      console.error(err);
+    }finally{
+      btn.textContent = oldLabel;
+      btn.disabled = false;
+    }
+  }, 50);
+});
+
+document.getElementById('bc-naar-toepaskaart').addEventListener('click', ()=>{
+  document.querySelector('.tab-btn[data-tab="kaart"]').click();
+  document.getElementById('naam-input').value = document.getElementById('bc-naam').value;
+});
+
+renderTijdzones();
+renderTypes();
+renderAuth();
+renderBodygraph();
+renderSelects();
+renderLines();
+renderProfiles();
+
+</script>
+</body>
+</html>
