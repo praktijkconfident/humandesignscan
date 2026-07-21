@@ -164,6 +164,12 @@
   .flip-card .txt{font-size:14px; color:#4a4a42; margin:0;}
   .toggle-hint{font-size:12px; color:#9a9384;}
 
+  .mini-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:10px;}
+  .mini-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .mini-card .num{font-family:'Cormorant Garamond',serif; color:var(--gold); font-size:16px; margin-right:6px; font-weight:500;}
+  .mini-card .naam{font-size:14px; color:var(--dark-green); font-weight:500;}
+  .mini-card p{margin:5px 0 0; font-size:12.5px; color:#4a4a42; line-height:1.5;}
+
   /* bodygraph */
   .bg-wrap{display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:flex-start;}
   @media(max-width:700px){.bg-wrap{grid-template-columns:1fr;}}
@@ -324,6 +330,8 @@
       <div class="blok"><div class="k">Autoriteit</div><div class="v" id="bc-result-auth"></div></div>
       <div class="blok"><div class="k">Profiel</div><div class="v" id="bc-result-profile"></div></div>
       <div class="blok"><div class="k">Gedefinieerde centra</div><div class="v" id="bc-result-centers"></div></div>
+      <div class="blok"><div class="k">Jouw poorten</div><div class="v" id="bc-result-gates"></div></div>
+      <div class="blok"><div class="k">Jouw kanalen</div><div class="v" id="bc-result-channels"></div></div>
       <div class="result-actions">
         <button id="bc-naar-toepaskaart">Bekijk toepaskaart voor dit type</button>
       </div>
@@ -381,7 +389,19 @@
       <h2 style="font-size:26px;">De twaalf profielen</h2>
       <p>Je profiel bestaat uit twee lijnen: de eerste is bewust (hoe je jezelf ervaart), de tweede onbewust (hoe anderen je vaak zien). Klik voor de betekenis.</p>
     </div>
-    <div class="grid-cards" id="profiles-grid"></div>
+    <div class="grid-cards" id="profiles-grid" style="margin-bottom:36px;"></div>
+
+    <div class="section-title">
+      <h2 style="font-size:26px;">De 64 poorten</h2>
+      <p>Elke poort is een thema. Hier vind je ze allemaal in gewone taal, op nummer.</p>
+    </div>
+    <div class="mini-grid" id="gates-grid" style="margin-bottom:36px;"></div>
+
+    <div class="section-title">
+      <h2 style="font-size:26px;">De 36 kanalen</h2>
+      <p>Een kanaal ontstaat als beide poorten van een paar bij jou actief zijn, en verbindt daarmee twee centra vast met elkaar.</p>
+    </div>
+    <div class="mini-grid" id="channels-grid"></div>
   </section>
 
   <!-- MIJN KAART -->
@@ -618,6 +638,130 @@ function renderProfiles(){
   grid.querySelectorAll('.flip-card').forEach(card=>{
     card.addEventListener('click', ()=> card.classList.toggle('open'));
   });
+}
+
+const GATES = [
+  {nr:1, naam:"Zelfexpressie", omschrijving:"Jouw unieke, creatieve manier om jezelf te laten zien."},
+  {nr:2, naam:"Richting", omschrijving:"Een innerlijk kompas dat de weg wijst, ook als je dat zelf niet altijd doorhebt."},
+  {nr:3, naam:"Orde uit chaos", omschrijving:"Het vermogen om structuur te scheppen in een nieuwe, rommelige situatie."},
+  {nr:4, naam:"Logica", omschrijving:"De behoefte aan een logische verklaring en antwoorden op vragen."},
+  {nr:5, naam:"Vaste patronen", omschrijving:"Comfort en kracht die ontstaan uit een vast ritme."},
+  {nr:6, naam:"Wrijving", omschrijving:"Het gevoel dat wrijving soms nodig is om nader tot elkaar te komen."},
+  {nr:7, naam:"Leiderschap", omschrijving:"De rol om richting te geven aan een groep, zonder dat je de leider hoeft te zijn."},
+  {nr:8, naam:"Bijdrage", omschrijving:"De behoefte om je unieke stijl zichtbaar te maken en bij te dragen."},
+  {nr:9, naam:"Focus", omschrijving:"Het vermogen om in kleine details vast te houden en af te maken."},
+  {nr:10, naam:"Zelfliefde", omschrijving:"Gedrag dat voortkomt uit trouw zijn aan wie je bent."},
+  {nr:11, naam:"Ideeën", omschrijving:"Een stroom van gedachten en concepten die gedeeld willen worden."},
+  {nr:12, naam:"Voorzichtigheid", omschrijving:"Het gevoel wanneer je wel of juist niet moet spreken."},
+  {nr:13, naam:"De luisteraar", omschrijving:"Vertrouwen winnen doordat mensen hun verhaal bij je kwijt kunnen."},
+  {nr:14, naam:"Slagkracht", omschrijving:"Brandstof en drive voor werk dat betekenis heeft."},
+  {nr:15, naam:"Uitersten", omschrijving:"Het omarmen van de volle breedte van het leven, met pieken en dalen."},
+  {nr:16, naam:"Vaardigheid", omschrijving:"Enthousiasme en talent dat verfijnd wil worden tot meesterschap."},
+  {nr:17, naam:"Meningen", omschrijving:"Een scherpe blik die patronen en logische verbanden ziet."},
+  {nr:18, naam:"Correctie", omschrijving:"Het vermogen om te zien wat beter kan, en dat te verbeteren."},
+  {nr:19, naam:"Behoefte", omschrijving:"Gevoeligheid voor wat jij en anderen nodig hebben om je verbonden te voelen."},
+  {nr:20, naam:"Het nu", omschrijving:"Aanwezig zijn in het huidige moment, en daaruit handelen."},
+  {nr:21, naam:"Controle", omschrijving:"De wens om je eigen plek en middelen te beheren."},
+  {nr:22, naam:"Gratie", omschrijving:"Sociale openheid en emotionele charme."},
+  {nr:23, naam:"Assimilatie", omschrijving:"Het simpel uitleggen van een inzicht dat eerst ingewikkeld leek."},
+  {nr:24, naam:"Terugkeer", omschrijving:"Steeds opnieuw nadenken tot een gedachte helder is."},
+  {nr:25, naam:"Onschuld", omschrijving:"Een universele liefde voor het leven zelf, ongeacht de omstandigheden."},
+  {nr:26, naam:"De verkoper", omschrijving:"Het vermogen om iets of jezelf overtuigend neer te zetten."},
+  {nr:27, naam:"Zorgen", omschrijving:"De zorg voor jezelf en anderen, en verantwoord beheer van middelen."},
+  {nr:28, naam:"Het spel", omschrijving:"De zoektocht naar een leven met betekenis, soms via risico."},
+  {nr:29, naam:"Volhouden", omschrijving:"De kracht om volledig ja te zeggen tegen een ervaring."},
+  {nr:30, naam:"Verlangen", omschrijving:"Intense gevoelens en verlangens die om ervaring vragen."},
+  {nr:31, naam:"Invloed", omschrijving:"Een stem die gehoord wordt en anderen kan leiden."},
+  {nr:32, naam:"Continuïteit", omschrijving:"Aanvoelen wat wel en niet stand zal houden op langere termijn."},
+  {nr:33, naam:"Privacy", omschrijving:"De behoefte aan terugtrekken en later delen wat je hebt geleerd."},
+  {nr:34, naam:"Kracht", omschrijving:"Pure, krachtige levensenergie die om beweging vraagt."},
+  {nr:35, naam:"Vooruitgang", omschrijving:"De wens om steeds nieuwe ervaringen op te doen."},
+  {nr:36, naam:"Crisis", omschrijving:"Emotionele intensiteit die vraagt om doorleefd te worden."},
+  {nr:37, naam:"Vriendschap", omschrijving:"De wens om warmte, familie en gelijkwaardigheid te creëren."},
+  {nr:38, naam:"Verzet", omschrijving:"De wens om te vechten voor wat écht belangrijk is."},
+  {nr:39, naam:"Provocatie", omschrijving:"Het losmaken van vaste patronen bij anderen, soms door tegendraads te zijn."},
+  {nr:40, naam:"Alleen zijn", omschrijving:"De behoefte aan eigen tijd na hard werken, om op te laden."},
+  {nr:41, naam:"Verlangen naar nieuw", omschrijving:"De eerste impuls en fantasie die iets nieuws in gang zet."},
+  {nr:42, naam:"Groei", omschrijving:"Het afronden van een cyclus, gedreven door groei."},
+  {nr:43, naam:"Inzicht", omschrijving:"Een plotseling doorbrekend inzicht dat niet altijd uit te leggen is."},
+  {nr:44, naam:"Alertheid", omschrijving:"Een instinctief aanvoelen van patronen uit het verleden."},
+  {nr:45, naam:"De verzamelaar", omschrijving:"De rol om een groep of gemeenschap te verzamelen en te leiden."},
+  {nr:46, naam:"Toewijding", omschrijving:"Geluk en succes door volledig aanwezig te zijn in je lichaam en leven."},
+  {nr:47, naam:"Verwerking", omschrijving:"Het duiden van ervaringen, soms pas jaren later begrepen."},
+  {nr:48, naam:"Diepgang", omschrijving:"De diepte en kennis die nodig is om iets goed op te lossen."},
+  {nr:49, naam:"Principes", omschrijving:"Sterke persoonlijke waarden over wat wel en niet oké is."},
+  {nr:50, naam:"Waarden", omschrijving:"Verantwoordelijkheid voor het bewaken van waarden binnen een groep."},
+  {nr:51, naam:"Schrik", omschrijving:"De schok die soms nodig is om uit je comfortzone te komen."},
+  {nr:52, naam:"Stilte", omschrijving:"De kracht van bewust stilzitten en focussen."},
+  {nr:53, naam:"Beginnen", omschrijving:"De energie om ergens aan te beginnen, zonder garantie op afmaken."},
+  {nr:54, naam:"Ambitie", omschrijving:"De drive om jezelf naar boven te werken en vooruit te komen."},
+  {nr:55, naam:"Geestkracht", omschrijving:"Emotionele diepgang, afhankelijk van innerlijke rijkdom in plaats van omstandigheden."},
+  {nr:56, naam:"Stimulatie", omschrijving:"Het vertellen van verhalen die anderen boeien en meenemen."},
+  {nr:57, naam:"Intuïtieve helderheid", omschrijving:"Een helder, in het nu aanwezig aanvoelen van wat veilig is."},
+  {nr:58, naam:"Levenslust", omschrijving:"Puur plezier en vitaliteit, ook in het verbeteren van dingen."},
+  {nr:59, naam:"Verbinding", omschrijving:"De wens om intieme, oprechte verbinding met een ander te maken."},
+  {nr:60, naam:"Acceptatie", omschrijving:"Het accepteren van beperkingen als voorwaarde voor iets nieuws."},
+  {nr:61, naam:"Mysterie", omschrijving:"Een innerlijke drang om te begrijpen wat niet direct te verklaren is."},
+  {nr:62, naam:"Details", omschrijving:"Het overbrengen van feiten en details op een concrete manier."},
+  {nr:63, naam:"Twijfel", omschrijving:"Een kritische geest die twijfelt om fouten te voorkomen."},
+  {nr:64, naam:"Verwarring", omschrijving:"Een hoofd vol indrukken die om orde vragen voor het helder wordt."}
+];
+
+const CHANNEL_INFO = [
+  {gates:[1,8], naam:"Inspiratie", omschrijving:"Jouw unieke bijdrage inspireert en zet een voorbeeld neer voor anderen."},
+  {gates:[2,14], naam:"De Slagader", omschrijving:"Een krachtige, gerichte levensenergie die weet welke richting het opgaat."},
+  {gates:[3,60], naam:"Mutatie", omschrijving:"Energie voor vernieuwing binnen de grenzen van wat mogelijk is."},
+  {gates:[4,63], naam:"Logica", omschrijving:"Het zoeken naar logische antwoorden en formules die twijfel wegnemen."},
+  {gates:[5,15], naam:"Ritme", omschrijving:"Een vast, herkenbaar levensritme dat voor jou en anderen prettig aanvoelt."},
+  {gates:[6,59], naam:"Paring", omschrijving:"De drang naar intieme verbinding en het doorbreken van afstand tussen mensen."},
+  {gates:[7,31], naam:"De Alfa", omschrijving:"Natuurlijk leiderschap dat richting geeft aan een grotere groep."},
+  {gates:[9,52], naam:"Concentratie", omschrijving:"Het vermogen om vastberaden te focussen tot iets is afgerond."},
+  {gates:[10,20], naam:"Ontwaken", omschrijving:"Bewust en oprecht handelen in het huidige moment."},
+  {gates:[10,34], naam:"Verkenning", omschrijving:"Het volgen van je eigen kracht op een manier die bij jou past."},
+  {gates:[10,57], naam:"Perfecte vorm", omschrijving:"Intuïtief aanvoelen wat goed is om te overleven en te floreren."},
+  {gates:[11,56], naam:"Nieuwsgierigheid", omschrijving:"Ideeën verzamelen en delen via verhalen die anderen boeien."},
+  {gates:[12,22], naam:"Openheid", omschrijving:"Sociale gevoeligheid die pas spreekt als het moment er goed voor is."},
+  {gates:[13,33], naam:"De verloren zoon", omschrijving:"Ervaringen verzamelen om later als waardevolle verhalen te delen."},
+  {gates:[16,48], naam:"De golflengte", omschrijving:"Talent dat verdiept wordt tot een vaardigheid waar mensen op vertrouwen."},
+  {gates:[17,62], naam:"Acceptatie", omschrijving:"Georganiseerde meningen die concreet en overtuigend worden overgebracht."},
+  {gates:[18,58], naam:"Oordeel", omschrijving:"Kritisch kijken naar wat beter kan, uit puur plezier in verbetering."},
+  {gates:[19,49], naam:"Synthese", omschrijving:"Gevoeligheid voor wat een groep nodig heeft om zich verbonden te voelen."},
+  {gates:[20,34], naam:"Charisma", omschrijving:"Krachtige, directe actie die anderen in beweging zet."},
+  {gates:[20,57], naam:"De hersengolf", omschrijving:"Intuïtieve alertheid die meteen in actie wordt omgezet."},
+  {gates:[21,45], naam:"Geld", omschrijving:"Het beheren van middelen en materiële zaken binnen een groep."},
+  {gates:[23,43], naam:"Structurering", omschrijving:"Een uniek inzicht helder en simpel uitleggen aan anderen."},
+  {gates:[24,61], naam:"Bewustzijn", omschrijving:"Steeds opnieuw nadenken tot een innerlijk mysterie helder wordt."},
+  {gates:[25,51], naam:"Initiatie", omschrijving:"Puur, onschuldig initiatief nemen, ook als dat een schok geeft."},
+  {gates:[26,44], naam:"Overgave", omschrijving:"Overtuigingskracht gebaseerd op instinctief aanvoelen van het verleden."},
+  {gates:[27,50], naam:"Behoud", omschrijving:"Zorgzaamheid gecombineerd met verantwoordelijk beheer van waarden."},
+  {gates:[28,38], naam:"Strijd", omschrijving:"Doorzettingsvermogen om te vechten voor iets dat het waard is."},
+  {gates:[29,46], naam:"Ontdekking", omschrijving:"Volledige toewijding aan een ervaring, met je lichaam en ziel erbij."},
+  {gates:[30,41], naam:"Herkenning", omschrijving:"Verlangen naar nieuwe ervaringen die iets in jou herkennen."},
+  {gates:[32,54], naam:"Transformatie", omschrijving:"Ambitie en aanvoelen wat wel of niet stand zal houden."},
+  {gates:[34,57], naam:"Kracht", omschrijving:"Pure kracht gestuurd door intuïtief, in het nu aanvoelen wat klopt."},
+  {gates:[35,36], naam:"Vergankelijkheid", omschrijving:"Steeds nieuwe ervaringen opzoeken, ook via emotionele pieken en dalen."},
+  {gates:[37,40], naam:"Gemeenschap", omschrijving:"Warmte en support binnen een familie of hechte kring, in ruil voor toewijding."},
+  {gates:[39,55], naam:"Emotie tonen", omschrijving:"Emotionele diepgang die losgemaakt wordt, soms door tegendraads gedrag."},
+  {gates:[42,53], naam:"Volwassenwording", omschrijving:"Cycli beginnen en afmaken als onderdeel van groei."},
+  {gates:[47,64], naam:"Abstractie", omschrijving:"Indrukken uit het verleden verwerken tot een helder inzicht."}
+];
+
+function renderGates(){
+  const grid = document.getElementById('gates-grid');
+  grid.innerHTML = GATES.map(g => `
+    <div class="mini-card">
+      <span class="num">${g.nr}</span><span class="naam">${g.naam}</span>
+      <p>${g.omschrijving}</p>
+    </div>`).join('');
+}
+
+function renderChannels(){
+  const grid = document.getElementById('channels-grid');
+  grid.innerHTML = CHANNEL_INFO.map(c => `
+    <div class="mini-card">
+      <span class="num">${c.gates[0]}-${c.gates[1]}</span><span class="naam">${c.naam}</span>
+      <p>${c.omschrijving}</p>
+    </div>`).join('');
 }
 
 function renderTypes(){
@@ -986,7 +1130,11 @@ function calculateChart(naam, datum, tijd, timeZone){
   const centerNamen = {hoofd:"Hoofd", ajna:"Ajna", keel:"Keel", g:"Identiteitscentrum", hart:"Hart (ego)", milt:"Milt", sacraal:"Sacraal", solar:"Solar plexus", wortel:"Wortel"};
   const definedCenterNamen = [...definedCenters].map(c=>centerNamen[c]);
 
-  return {naam, type, authority, profile, definedCenterNamen};
+  const definedChannelPairs = CHANNELS.filter(([a,b]) => activatedGates.has(a) && activatedGates.has(b));
+
+  return {naam, type, authority, profile, definedCenterNamen,
+    activatedGates: [...activatedGates].sort((a,b)=>a-b),
+    definedChannelPairs};
 }
 
 document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
@@ -1017,6 +1165,22 @@ document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
       document.getElementById('bc-result-profile').textContent = `Profiel ${result.profile}`;
       document.getElementById('bc-result-centers').textContent = result.definedCenterNamen.length ? result.definedCenterNamen.join(', ') : 'geen (Reflector)';
 
+      const gateNamen = result.activatedGates.map(nr=>{
+        const g = GATES.find(x=>x.nr===nr);
+        return `${nr} · ${g.naam}`;
+      });
+      document.getElementById('bc-result-gates').innerHTML = gateNamen.join('<br>');
+
+      if(result.definedChannelPairs.length){
+        const channelNamen = result.definedChannelPairs.map(([a,b])=>{
+          const c = CHANNEL_INFO.find(x => (x.gates[0]===a && x.gates[1]===b) || (x.gates[0]===b && x.gates[1]===a));
+          return c ? `${a}-${b} · ${c.naam}` : `${a}-${b}`;
+        });
+        document.getElementById('bc-result-channels').innerHTML = channelNamen.join('<br>');
+      } else {
+        document.getElementById('bc-result-channels').textContent = 'geen volledig kanaal (losse poorten, geen vaste verbinding)';
+      }
+
       document.getElementById('type-select').value = typeInfo.id;
       document.getElementById('auth-select').value = authInfo.id;
 
@@ -1044,6 +1208,8 @@ renderBodygraph();
 renderSelects();
 renderLines();
 renderProfiles();
+renderGates();
+renderChannels();
 
 </script>
 </body>
