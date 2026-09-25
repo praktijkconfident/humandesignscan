@@ -165,10 +165,16 @@
   .toggle-hint{font-size:12px; color:#9a9384;}
 
   .mini-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:10px;}
-  .mini-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .mini-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; cursor:pointer; transition:.2s;}
+  .mini-card:hover{border-color:var(--gold);}
   .mini-card .num{font-family:'Cormorant Garamond',serif; color:var(--gold); font-size:16px; margin-right:6px; font-weight:500;}
   .mini-card .naam{font-size:14px; color:var(--dark-green); font-weight:500;}
   .mini-card p{margin:5px 0 0; font-size:12.5px; color:#4a4a42; line-height:1.5;}
+  .mini-card .centra{display:block; margin-top:2px; font-size:11px; color:#9a9384;}
+  .mini-card .detail{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);}
+  .mini-card.open .detail{display:block;}
+  .mini-card .detail .label{font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--gold); margin:8px 0 2px;}
+  .mini-card .detail .label:first-child{margin-top:0;}
 
   /* bodygraph */
   .bg-wrap{display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:flex-start;}
@@ -204,6 +210,15 @@
   }
   .placeholder{color:#9a9384; font-size:14px; font-style:italic;}
 
+  /* persoonlijk gekleurd schema, in de resultaatkaart */
+  .bc-bg-wrap{
+    max-width:260px; margin:6px auto 22px; background:#fff; border-radius:14px;
+    padding:18px 16px 14px; print-color-adjust:exact; -webkit-print-color-adjust:exact;
+  }
+  .bc-bg-wrap svg{width:100%; height:auto; display:block;}
+  .bc-bg-legend{font-size:11.5px; color:var(--green-soft); text-align:center; margin:10px 0 0;}
+  .bc-bg-legend .dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle;}
+
   /* mijn kaart */
   .form-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px; margin-bottom:24px;}
   .field{margin-bottom:18px;}
@@ -236,6 +251,25 @@
   }
   .result-actions button:hover{background:rgba(255,255,255,.22);}
   footer{text-align:center; padding:30px 24px 10px; font-size:12px; color:#9a9384;}
+  .narrative h4{font-size:16px; color:var(--dark-green); margin:20px 0 6px;}
+  .narrative h4:first-child{margin-top:0;}
+  .narrative p{font-size:14.5px; color:#4a4a42; margin:0 0 8px; line-height:1.65;}
+  @media print{
+    /* Print alleen het ingevulde, persoonlijke resultaat van de laatst opgevraagde
+       persoon, niet de algemene naslag-tabbladen (types, poorten, kanalen, etc.).
+       Alleen het actieve tabblad blijft zichtbaar (de standaard .panel.active regel
+       hierboven regelt dat al), en binnen "Bereken je type" / "Mijn toepaskaart"
+       verbergen we de intro en het invulformulier, zodat alleen de ingevulde kaart
+       en de persoonlijke tekst overblijven. */
+    nav.tabs, header.top .eyebrow, .result-actions{display:none !important;}
+    #panel-bereken .section-title, #panel-bereken .form-card,
+    #panel-kaart .section-title, #panel-kaart .form-card{display:none !important;}
+    .wrap{max-width:100%;}
+    /* Forceer dat kleuren (de donkergroene kaart, het goud, het gekleurde
+       schema) altijd worden meegeprint, ook als de browser standaard
+       achtergrondkleuren weglaat bij het afdrukken. */
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important;}
+  }
 </style>
 </head>
 <body>
@@ -250,10 +284,13 @@
   <nav class="tabs">
     <button class="tab-btn active" data-tab="start">Start</button>
     <button class="tab-btn" data-tab="bereken">Bereken je type</button>
-    <button class="tab-btn" data-tab="types">Jouw type</button>
-    <button class="tab-btn" data-tab="autoriteit">Autoriteit</button>
-    <button class="tab-btn" data-tab="centra">Centra</button>
-    <button class="tab-btn" data-tab="poorten">Poorten &amp; profiel</button>
+    <button class="tab-btn" data-tab="kanalen">Kanalen</button>
+    <button class="tab-btn" data-tab="poorten">Poorten</button>
+    <button class="tab-btn" data-tab="autoriteiten">Autoriteiten</button>
+    <button class="tab-btn" data-tab="profielen">Profielen</button>
+    <button class="tab-btn" data-tab="lijnen">Lijnen</button>
+    <button class="tab-btn" data-tab="definitie">Definitie</button>
+    <button class="tab-btn" data-tab="variabelen">Variabelen &amp; toon</button>
     <button class="tab-btn" data-tab="kaart">Mijn toepaskaart</button>
   </nav>
 
@@ -267,11 +304,8 @@
     <div class="intro-grid">
       <div class="card">
         <h3>Wat je hier vindt</h3>
-        <div class="stap"><span class="nr">1</span><div><h4>Bereken je type</h4><p>Vul je geboortegegevens in en ontdek direct je type, autoriteit en profiel.</p></div></div>
-        <div class="stap"><span class="nr">2</span><div><h4>Jouw type</h4><p>De vijf energietypes en de strategie die daarbij hoort, in gewone taal.</p></div></div>
-        <div class="stap"><span class="nr">3</span><div><h4>Autoriteit</h4><p>Hoe je lichaam je eigenlijk al vertelt wat een goed besluit is.</p></div></div>
-        <div class="stap"><span class="nr">4</span><div><h4>Centra &amp; poorten</h4><p>Vereenvoudigde uitleg van de negen centra, de poorten, kanalen en profielen.</p></div></div>
-        <div class="stap"><span class="nr">5</span><div><h4>Mijn toepaskaart</h4><p>Vul in wat je weet over jezelf en krijg een persoonlijke, praktische samenvatting.</p></div></div>
+        <div class="stap"><span class="nr">1</span><div><h4>Bereken je type</h4><p>Vul je geboortegegevens in en krijg je volledige, persoonlijke design: type, autoriteit, profiel, definitie, variabelen, je gekleurde schema en de betekenis van al jouw actieve poorten en kanalen. Alleen wat op jou van toepassing is, niets anders.</p></div></div>
+        <div class="stap"><span class="nr">2</span><div><h4>Mijn toepaskaart</h4><p>Weet je je type en autoriteit al van elders? Vul ze in en krijg direct een korte, praktische samenvatting om te bewaren.</p></div></div>
       </div>
       <div class="card">
         <h3>Hoe vraag je je eigen chart op</h3>
@@ -280,15 +314,6 @@
         <p>Deze tool geeft een goede, praktische inschatting. Voor een uitgebreide officiële reading kun je terecht bij mij in de praktijk. Neem contact op via <a href="mailto:info@praktijkconfident.nl" style="color:var(--dark-green);">info@praktijkconfident.nl</a>.</p>
       </div>
     </div>
-  </section>
-
-  <!-- TYPES -->
-  <section class="panel" id="panel-types">
-    <div class="section-title">
-      <h2>De vijf energietypes</h2>
-      <p>Je type zegt iets over hoe jouw energie werkt en hoe je die het beste inzet. Klik op een kaart voor de volledige uitleg.</p>
-    </div>
-    <div class="grid-cards" id="types-grid"></div>
   </section>
 
   <!-- BEREKEN JE TYPE -->
@@ -326,89 +351,105 @@
     <div class="result-card" id="bc-result">
       <h3>Jouw ontwerp</h3>
       <p class="naam" id="bc-result-naam">-</p>
+      <div class="bc-bg-wrap">
+        <svg id="bc-bodygraph" viewBox="0 0 280 520" xmlns="http://www.w3.org/2000/svg"></svg>
+        <p class="bc-bg-legend"><span class="dot" style="background:var(--gold);"></span>gedefinieerd (jouw vaste energie) &nbsp;&nbsp; <span class="dot" style="background:#fff; border:1px solid var(--dark-green);"></span>open (waar jij wijs en gevoelig bent)</p>
+      </div>
       <div class="blok"><div class="k">Type</div><div class="v" id="bc-result-type"></div></div>
       <div class="blok"><div class="k">Autoriteit</div><div class="v" id="bc-result-auth"></div></div>
       <div class="blok"><div class="k">Profiel</div><div class="v" id="bc-result-profile"></div></div>
+      <div class="blok"><div class="k">Definitie</div><div class="v" id="bc-result-definitie"></div></div>
+      <div class="blok"><div class="k">Variabelen (pijlen)</div><div class="v" id="bc-result-variabelen"></div></div>
       <div class="blok"><div class="k">Gedefinieerde centra</div><div class="v" id="bc-result-centers"></div></div>
       <div class="blok"><div class="k">Jouw poorten</div><div class="v" id="bc-result-gates"></div></div>
       <div class="blok"><div class="k">Jouw kanalen</div><div class="v" id="bc-result-channels"></div></div>
       <div class="result-actions">
         <button id="bc-naar-toepaskaart">Bekijk toepaskaart voor dit type</button>
+        <button id="bc-print-btn">Afdrukken</button>
+        <button id="bc-copy-btn">Kopieer tekst</button>
       </div>
+    </div>
+
+    <div class="card" id="bc-narrative-wrap" style="display:none; margin-top:24px;">
+      <h3 style="font-size:22px; margin:0 0 10px;">Jouw design in woorden</h3>
+      <div id="bc-narrative" class="narrative"></div>
     </div>
   </section>
 
-  <!-- AUTORITEIT -->
-  <section class="panel" id="panel-autoriteit">
+  <!-- KANALEN & SYNTHESE -->
+  <section class="panel" id="panel-kanalen">
     <div class="section-title">
-      <h2>Jouw autoriteit</h2>
-      <p>Je autoriteit is de plek in je lichaam waar betrouwbare besluiten vandaan komen, niet uit je hoofd. Klik op een kaart voor de volledige uitleg.</p>
+      <h2>Kanalen</h2>
+      <p>Een kanaal ontstaat wanneer twee poorten aan elkaar verbinden en legt een vaste, blijvende verbinding tussen twee centra aan. Dit zijn de 36 kanalen van het Human Design systeem. Klik op een kanaal voor de volledige uitleg, sterke kant, valkuil en wat het betekent als je slechts één poort van het paar hebt.</p>
+    </div>
+    <div class="mini-grid" id="channels-grid"></div>
+  </section>
+
+  <!-- POORTEN -->
+  <section class="panel" id="panel-poorten">
+    <div class="section-title">
+      <h2>Poorten</h2>
+      <p>De 64 poorten zijn de kleinste bouwstenen van je ontwerp. Elke poort staat voor een eigen thema, en wordt pas een vaste, constante eigenschap zodra ook de tegenoverliggende poort van het kanaal actief is. Klik op een poort voor de volledige uitleg.</p>
+    </div>
+    <div class="mini-grid" id="gates-grid"></div>
+  </section>
+
+  <!-- AUTORITEITEN -->
+  <section class="panel" id="panel-autoriteiten">
+    <div class="section-title">
+      <h2>Autoriteiten</h2>
+      <p>Je autoriteit is de manier waarop jij betrouwbare besluiten neemt. Klik op een autoriteit voor de uitleg, hoe je hem in de praktijk toepast en een herkenbare zin.</p>
     </div>
     <div class="grid-cards" id="auth-grid"></div>
   </section>
 
-  <!-- CENTRA -->
-  <section class="panel" id="panel-centra">
+  <!-- PROFIELEN -->
+  <section class="panel" id="panel-profielen">
     <div class="section-title">
-      <h2>De negen centra</h2>
-      <p>Elk centrum is een gebied van je leven. Is een centrum gedefinieerd, dan werkt het bij jou constant. Is het open, dan ben je daar wijs en gevoelig voor de energie van anderen. Klik op een vorm in het schema.</p>
+      <h2>Profielen</h2>
+      <p>Je profiel bestaat uit twee lijnen: de eerste is bewust en is hoe jij jezelf ervaart, de tweede is onbewust en is vaak hoe anderen je zien. Klik op een profiel voor de uitleg.</p>
     </div>
-    <div class="bg-wrap">
-      <svg id="bodygraph" viewBox="0 0 280 520" xmlns="http://www.w3.org/2000/svg"></svg>
-      <div class="center-info" id="center-info">
-        <p class="placeholder">Klik op een vorm in het schema om te lezen wat dat centrum betekent, gedefinieerd of open.</p>
-      </div>
-    </div>
+    <div class="grid-cards" id="profiles-grid"></div>
   </section>
 
-  <!-- POORTEN & PROFIEL -->
-  <section class="panel" id="panel-poorten">
+  <!-- LIJNEN -->
+  <section class="panel" id="panel-lijnen">
     <div class="section-title">
-      <h2>Poorten, kanalen &amp; profiel</h2>
-      <p>De laatste laag jargon, in gewone taal: wat poorten en kanalen precies zijn, hoe lijnen werken, en welk profiel daaruit ontstaat.</p>
+      <h2>Lijnen</h2>
+      <p>De zes lijnen zijn de basisthema's waaruit een profiel is opgebouwd. Klik op een lijn voor de uitleg, sterke kant, valkuil en een concrete tip.</p>
     </div>
+    <div class="grid-cards" id="lines-grid"></div>
+  </section>
 
-    <div class="intro-grid" style="margin-bottom:36px;">
-      <div class="card">
-        <h3>Wat is een poort</h3>
-        <p>Elke poort is een van de 64 thema's in je ontwerp, zoals nieuwsgierigheid, leiderschap of gevoeligheid. Een poort wordt bij jou actief wanneer een planeet op je geboortemoment (of ongeveer 88 dagen daarvoor) in het bijbehorende stukje van de dierenriem stond. De meeste mensen hebben tussen de 20 en 30 actieve poorten.</p>
-      </div>
-      <div class="card">
-        <h3>Wat is een kanaal</h3>
-        <p>Twee poorten die tegenover elkaar liggen vormen samen een kanaal, en verbinden daarmee twee centra met elkaar. Heb jij beide poorten van zo'n kanaal, dan is het gedefinieerd en werkt die energie constant en betrouwbaar in jou. Er zijn in totaal 36 kanalen, elk met een eigen thema.</p>
-      </div>
-    </div>
-
+  <!-- DEFINITIE -->
+  <section class="panel" id="panel-definitie">
     <div class="section-title">
-      <h2 style="font-size:26px;">De zes lijnen</h2>
-      <p>Elke poort heeft 6 lijnen. De lijn van je Zon geeft, samen met de lijn van je Zon 88 dagen voor je geboorte, je profiel: de rol die je van nature speelt in het leven.</p>
+      <h2>Definitie</h2>
+      <p>Je definitie laat zien hoe jouw gedefinieerde centra onderling verbonden zijn, en daarmee of jij van nature op zoek gaat naar anderen om je systeem aan te vullen. Klik op een definitie voor de uitleg.</p>
     </div>
-    <div class="grid-cards" id="lines-grid" style="margin-bottom:36px;"></div>
+    <div class="grid-cards" id="definitie-grid"></div>
+  </section>
 
+  <!-- VARIABELEN & TOON -->
+  <section class="panel" id="panel-variabelen">
     <div class="section-title">
-      <h2 style="font-size:26px;">De twaalf profielen</h2>
-      <p>Je profiel bestaat uit twee lijnen: de eerste is bewust (hoe je jezelf ervaart), de tweede onbewust (hoe anderen je vaak zien). Klik voor de betekenis.</p>
+      <h2>Variabelen &amp; toon</h2>
+      <p>De vier variabelen (de pijlen) laten zien in welke richting jouw digestie, omgeving, motivatie en perspectief het beste werken. Die richting volgt uit de toon van de betreffende poort in je ontwerp: toon 1 tot en met 3 wijst naar links (actief), toon 4 tot en met 6 wijst naar rechts (ontvangend). Klik op een variabele voor de uitleg per richting.</p>
     </div>
-    <div class="grid-cards" id="profiles-grid" style="margin-bottom:36px;"></div>
+    <div class="grid-cards" id="variabelen-grid"></div>
 
-    <div class="section-title">
-      <h2 style="font-size:26px;">De 64 poorten</h2>
-      <p>Elke poort is een thema. Hier vind je ze allemaal in gewone taal, op nummer.</p>
+    <div class="section-title" style="margin-top:36px;">
+      <h2>De zes tonen (zintuigen)</h2>
+      <p>De toon zelf, de fijnste laag onder lijn en kleur, wordt in de klassieke Human Design leer gekoppeld aan een zintuig: de manier waarop jij van nature checkt of iets klopt.</p>
     </div>
-    <div class="mini-grid" id="gates-grid" style="margin-bottom:36px;"></div>
-
-    <div class="section-title">
-      <h2 style="font-size:26px;">De 36 kanalen</h2>
-      <p>Een kanaal ontstaat als beide poorten van een paar bij jou actief zijn, en verbindt daarmee twee centra vast met elkaar.</p>
-    </div>
-    <div class="mini-grid" id="channels-grid"></div>
+    <div class="grid-cards" id="tonen-grid"></div>
   </section>
 
   <!-- MIJN KAART -->
   <section class="panel" id="panel-kaart">
     <div class="section-title">
       <h2>Mijn toepaskaart</h2>
-      <p>Vul in wat je van jezelf weet en krijg een persoonlijke, praktische samenvatting die je kunt bewaren.</p>
+      <p>Vul in wat je van jezelf weet en krijg een persoonlijke, praktische samenvatting die je kunt bewaren. Type en autoriteit zijn verplicht, de rest is optioneel: vul alleen aan wat je al van elders weet.</p>
     </div>
 
     <div class="form-card">
@@ -424,6 +465,30 @@
         <label for="auth-select">Mijn autoriteit</label>
         <select id="auth-select"></select>
       </div>
+      <div class="field">
+        <label for="profile-select">Mijn profiel (optioneel)</label>
+        <select id="profile-select"></select>
+      </div>
+      <div class="field">
+        <label for="definitie-select">Mijn definitie (optioneel)</label>
+        <select id="definitie-select"></select>
+      </div>
+      <div class="field">
+        <label for="var-determination-select">Mijn digestie (optioneel)</label>
+        <select id="var-determination-select"></select>
+      </div>
+      <div class="field">
+        <label for="var-environment-select">Mijn omgeving (optioneel)</label>
+        <select id="var-environment-select"></select>
+      </div>
+      <div class="field">
+        <label for="var-motivation-select">Mijn motivatie (optioneel)</label>
+        <select id="var-motivation-select"></select>
+      </div>
+      <div class="field">
+        <label for="var-perspective-select">Mijn perspectief (optioneel)</label>
+        <select id="var-perspective-select"></select>
+      </div>
       <button class="btn" id="maak-kaart">Maak mijn toepaskaart</button>
     </div>
 
@@ -433,6 +498,11 @@
       <div class="blok"><div class="k">Strategie</div><div class="v" id="result-strategie"></div></div>
       <div class="blok"><div class="k">Let op bij</div><div class="v" id="result-nietzelf"></div></div>
       <div class="blok"><div class="k">Zo neem je besluiten</div><div class="v" id="result-autoriteit"></div></div>
+      <div class="blok" id="result-profiel-blok" style="display:none;"><div class="k">Profiel</div><div class="v" id="result-profiel"></div></div>
+      <div class="blok" id="result-definitie-blok" style="display:none;"><div class="k">Definitie</div><div class="v" id="result-definitie"></div></div>
+      <div class="blok"><div class="k">Sterke kant</div><div class="v" id="result-sterk"></div></div>
+      <div class="blok"><div class="k">Valkuil</div><div class="v" id="result-valkuil"></div></div>
+      <div class="blok" id="result-variabelen-blok" style="display:none;"><div class="k">Variabelen &amp; toon</div><div class="v" id="result-variabelen"></div></div>
       <div class="blok"><div class="k">Vandaag toepasbaar</div><div class="v" id="result-tip"></div></div>
       <div class="result-actions">
         <button id="print-btn">Afdrukken</button>
@@ -451,45 +521,65 @@ const TYPES = [
     id:"generator",
     naam:"Generator",
     pct:"~37%",
+    thema:"Bouwer met een constante motor voor werk dat energie geeft.",
     strategie:"Reageren. Wacht tot iets of iemand in je leven verschijnt om op te reageren, dan volgt je lijf vanzelf of het klopt.",
     nietzelf:"Frustratie, als je zelf initiatief neemt in plaats van te reageren, of te lang blijft hangen in iets dat geen energie meer geeft.",
     herkenbaar:"Je hebt veel doe-energie zodra iets je aanspreekt, maar merkt dat initiatief nemen zonder duidelijke aanleiding niet lekker werkt.",
+    sterk:["Een vrijwel onuitputtelijke werkenergie zodra je met het juiste bezig bent.","Doorzettingsvermogen: je maakt af waar je ja tegen hebt gezegd.","Een lijf dat feilloos aanvoelt wat wel en niet klopt, als je even stil wordt."],
+    valkuil:["Ja zeggen uit beleefdheid of gewoonte, in plaats van omdat je buik ja zegt.","Zelf van alles starten en dan merken dat het niet doorloopt.","Doorgaan met werk dat allang geen energie meer geeft, tot de frustratie te groot wordt."],
+    patroon:"Het terugkerende patroon is initiatief nemen en dan vastlopen. Zodra je leert wachten op iets om op te reageren in plaats van zelf te trekken, verdwijnt een groot deel van die frustratie vanzelf.",
     tip:"Stel jezelf ja/nee vragen in plaats van open vragen, en luister naar het geluid of gevoel dat vanzelf komt."
   },
   {
     id:"mg",
     naam:"Manifesterende Generator",
     pct:"~33%",
+    thema:"Snelle, veelzijdige bouwer die meerdere sporen tegelijk trekt.",
     strategie:"Reageren, en daarna informeren wie het aangaat voordat je in actie komt. Zo mis je geen stappen.",
     nietzelf:"Frustratie en soms boosheid, als je stappen overslaat of te veel tegelijk vasthoudt.",
     herkenbaar:"Je bent snel, springt makkelijk tussen dingen en hebt weinig geduld met trage processen.",
+    sterk:["Snelheid: je herkent kortere wegen naar hetzelfde resultaat.","Van nature multi-inzetbaar, je kunt moeiteloos schakelen tussen verschillende sporen.","Net als de Generator een betrouwbare buikreactie als kompas."],
+    valkuil:["Stappen overslaan waardoor je later alsnog moet terugkeren, wat juist tijd kost.","Ongeduld met mensen of processen die minder snel gaan dan jij.","Te veel tegelijk vasthouden, waardoor niets echt wordt afgemaakt."],
+    patroon:"Het patroon is haast maken en daardoor net dat ene stapje overslaan dat achteraf een omweg blijkt. Informeren voordat je gaat, kost een paar seconden en voorkomt uren vertraging.",
     tip:"Informeren is geen toestemming vragen. Het is anderen op tijd meenemen, zodat jij niet vastloopt op weerstand die je had kunnen voorkomen."
   },
   {
     id:"projector",
     naam:"Projector",
     pct:"~20%",
+    thema:"Gids die systemen en mensen helder doorziet, zonder eigen constante motor.",
     strategie:"Wachten op een uitnodiging voor de grote dingen: werk, relaties, erkenning.",
     nietzelf:"Bitterheid, als je energie steekt in dingen die niet gezien of gewaardeerd worden.",
     herkenbaar:"Je ziet mensen en systemen helder aan, raakt sneller vermoeid van langdurige fysieke inzet, en bent gevoelig voor erkenning.",
+    sterk:["Een scherp, van buitenaf kijkend overzicht op mensen en processen.","Diepgang: als je ergens voor gevraagd wordt, ga je verder dan de oppervlakte.","Efficiëntie, je vindt vaak in korte tijd de kern van iets."],
+    valkuil:["Energie erin stoppen zonder dat erom gevraagd is, en dan niet gezien worden.","Doorgaan op fysieke energie die je eigenlijk niet hebt, tot uitputting toe.","Je aanpassen om er toch bij te horen, in plaats van te wachten tot je uitgenodigd wordt."],
+    patroon:"Het patroon is ongevraagd advies geven of hard werken om waardering te verdienen, en dan bitter worden als dat niet gezien wordt. Wachten voelt passief, maar is voor jou juist de actieve stap.",
     tip:"Bouw rust in vóórdat je moe bent. Deel je inzichten pas als er echt om gevraagd wordt, dan landen ze ook beter."
   },
   {
     id:"manifestor",
     naam:"Manifestor",
     pct:"~9%",
+    thema:"Initiatiefnemer die zelfstandig in beweging komt en anderen op gang zet.",
     strategie:"Informeren voordat je iets doet, zodat mensen om je heen niet overvallen worden.",
     nietzelf:"Boosheid, als je tegengehouden wordt of het informeren overslaat.",
     herkenbaar:"Je bent een initiatiefnemer die het liefst zelfstandig werkt, en kunt onbedoeld weerstand oproepen bij anderen.",
+    sterk:["Het vermogen om zonder aanleiding van een ander iets in gang te zetten.","Onafhankelijkheid en een natuurlijke impact op je omgeving.","Duidelijkheid: als je informeert, weet iedereen om je heen waar ze aan toe zijn."],
+    valkuil:["Dingen in stilte doen, waardoor mensen zich overvallen voelen en tegenwerken.","Boos worden als iemand je pad blokkeert, in plaats van vooraf ruimte te maken.","Je terugtrekken uit onbegrip in plaats van uit te leggen waar je mee bezig bent."],
+    patroon:"Het patroon is in je eentje beslissen en dan tegen weerstand aanlopen die eigenlijk te voorkomen was. Informeren maakt je niet afhankelijk, het maakt je pad rustiger.",
     tip:"Informeren voelt in het begin kwetsbaar, maar maakt je pad juist rustiger. Mensen voelen zich minder overvallen en werken makkelijker mee."
   },
   {
     id:"reflector",
     naam:"Reflector",
     pct:"~1%",
+    thema:"Spiegel van de omgeving, met een uniek open ontwerp zonder vaste centra.",
     strategie:"Een volledige maancyclus, ongeveer 28 dagen, de tijd nemen voor grote besluiten.",
     nietzelf:"Teleurstelling, als je jezelf onder druk zet om snel te beslissen.",
     herkenbaar:"Je neemt de sfeer van je omgeving sterk over en voelt je van dag tot dag anders, wat een gevoelig kompas is voor gezonde plekken en mensen.",
+    sterk:["Een zeldzame, brede gevoeligheid die feilloos aanvoelt of een omgeving of groep gezond is.","Objectiviteit: je hebt geen vast referentiekader en kunt daardoor heel eerlijk spiegelen.","Verwondering en een fris perspectief, elke dag opnieuw."],
+    valkuil:["Jezelf onder druk zetten om net zo snel te beslissen als de mensen om je heen.","Te lang blijven in een omgeving of relatie die niet goed voelt, zonder dat je het meteen kunt duiden.","Je eigen stemmingen verwarren met wie je bent, terwijl het vaak de omgeving is die je oppikt."],
+    patroon:"Het patroon is snel willen beslissen om bij anderen aan te sluiten, en later merken dat het besluit niet klopte. Tijd is voor jou geen vertraging maar de manier waarop helderheid ontstaat.",
     tip:"Omring jezelf bewust met mensen en plekken die je goed doen. Dat kleurt letterlijk mee in hoe jij je voelt."
   }
 ];
@@ -500,113 +590,238 @@ const AUTH = [
     naam:"Emotioneel",
     wat:"Jouw gevoel beweegt in golven, van hoog naar laag en weer terug. Er is geen emotionele waarheid op één moment.",
     praktisch:"Neem geen definitief besluit op een piek of een dal. Wacht tot de golf tot rust komt, dat kan uren tot een paar dagen duren.",
-    zin:"Ik weet het antwoord pas als ik er een nacht over geslapen heb."
+    zin:"Ik weet het antwoord pas als ik er een nacht over geslapen heb.",
+    sterk:["Besluiten die je neemt, zijn vaak diep doordacht en houden stand.","Je voelt de volle breedte van het leven, met echte pieken en echte dalen.","Anderen ervaren je uiteindelijk als iemand met een betrouwbaar en warm gevoel."],
+    valkuil:["Ja of nee zeggen op het hoogte- of dieptepunt van de golf, en er later spijt van hebben.","Jezelf of anderen onder druk zetten voor een snel antwoord, terwijl dat er niet is.","Duidelijkheid verwarren met de intensiteit van het moment."],
+    patroon:"Het terugkerende patroon is druk voelen om meteen te reageren, terwijl jouw waarheid pas zichtbaar wordt als de golf is uitgedoofd. Er bestaat geen emotionele waarheid in het nu, alleen na verloop van tijd."
   },
   {
     id:"sacraal",
     naam:"Sacraal",
     wat:"Je lijf reageert direct met een ja of nee gevoel in je buik, nog voor je hoofd erover nadenkt.",
     praktisch:"Stel jezelf ja/nee vragen hardop en luister naar het geluid of gevoel dat spontaan komt.",
-    zin:"Mijn buik weet het eerder dan mijn hoofd."
+    zin:"Mijn buik weet het eerder dan mijn hoofd.",
+    sterk:["Een directe, betrouwbare reactie die zelden liegt.","Snelheid: je hoeft niet lang na te denken, het antwoord is er al.","Veel energie zodra je op iets reageert dat echt bij je past."],
+    valkuil:["Toch nadenken en het hoofd laten winnen van de buikreactie.","Ja zeggen op een gesloten vraag die eigenlijk geen ruimte gaf voor een écht signaal.","Reageren op signalen van anderen in plaats van op je eigen reactie."],
+    patroon:"Het patroon is het hoofd om een mening vragen bij iets waar het lijf al antwoord op gaf. Vertrouw het geluid of het gevoel dat spontaan komt, ook als het geen woorden heeft."
   },
   {
     id:"milt",
     naam:"Milt",
     wat:"Een stille, directe intuïtie die in het nu spreekt, en zich niet herhaalt.",
     praktisch:"Dit signaal fluistert maar één keer. Oefen om er meteen naar te handelen, in plaats van het weg te redeneren.",
-    zin:"Ik voelde meteen dat het niet klopte, maar kon het niet uitleggen."
+    zin:"Ik voelde meteen dat het niet klopte, maar kon het niet uitleggen.",
+    sterk:["Scherpe overlevingsintuïtie, gericht op wat goed en veilig is voor je gezondheid en welzijn.","Helderheid die meteen aanwezig is, zonder dat je hoeft te wachten.","Een fijne antenne voor mensen en situaties die niet bij je passen."],
+    valkuil:["Het stille signaal wegredeneren omdat het geen duidelijke reden geeft.","Achteraf spijt hebben omdat je het gevoel wel had, maar er niets mee deed.","Bang blijven vasthouden aan iets uit angst, in plaats van te vertrouwen op het huidige signaal."],
+    patroon:"Het patroon is het eerste, zachte signaal missen en pas later, via een dieper of luider gevoel, alsnog de boodschap krijgen. Oefening zit in sneller reageren op het fluisteren zelf.",
   },
   {
     id:"ego",
     naam:"Ego / hart",
     wat:"Besluiten komen voort uit wilskracht en wat jij daadwerkelijk wilt, niet uit wat zou moeten.",
     praktisch:"Vraag jezelf 'wil ik dit echt' in plaats van 'moet ik dit', en spreek je wil hardop uit.",
-    zin:"Als ik het wil, kan ik het ook waarmaken."
+    zin:"Als ik het wil, kan ik het ook waarmaken.",
+    sterk:["Doorzettingsvermogen zodra je iets echt wilt.","Directheid: je zegt wat je bedoelt en maakt afspraken waar.","Een natuurlijke overtuigingskracht, mensen geloven je als je iets belooft."],
+    valkuil:["Beloftes maken vanuit moeten of bewijsdrang, in plaats van vanuit echt willen.","Jezelf voortdurend bewijzen, ook wanneer daar geen enkele reden voor is.","Doorzetten uit trots, terwijl je wilskracht eigenlijk op is."],
+    patroon:"Het patroon is ja zeggen om iets te bewijzen en daarna vastlopen op een belofte die niet uit een echt verlangen kwam. Rust nemen is voor jou net zo geldig als iets waarmaken."
   },
   {
     id:"zelfgeprojecteerd",
     naam:"Zelf-geprojecteerd",
     wat:"Helderheid ontstaat door hardop te praten, niet door in je hoofd te blijven denken.",
     praktisch:"Zoek een luisterend oor en praat je besluit uit. Let op je eigen stem en toon terwijl je praat, daar zit het antwoord.",
-    zin:"Ik hoor pas wat ik echt vind als ik het uitspreek."
+    zin:"Ik hoor pas wat ik echt vind als ik het uitspreek.",
+    sterk:["Een sterk, stabiel gevoel van identiteit zodra je jezelf hardop hoort.","Overtuigingskracht die ontstaat doordat je praat vanuit wie je werkelijk bent.","Vermogen om anderen echt te laten voelen wie jij bent, door simpelweg te praten."],
+    valkuil:["Besluiten in je eentje in je hoofd nemen, zonder ze hardop uit te spreken.","Advies van de luisteraar overnemen, terwijl die er alleen voor is om te weerkaatsen.","Verwarring voelen zolang je een onderwerp niet hardop hebt gedeeld."],
+    patroon:"Het patroon is in je hoofd blijven malen over iets dat je eigenlijk gewoon hardop moet uitspreken. De juiste luisteraar stelt geen vragen, die weerkaatst alleen jouw eigen woorden en toon."
   },
   {
     id:"mentaal",
     naam:"Mentaal (omgeving)",
     wat:"Je hebt geen innerlijke autoriteit in je lijf, maar bent gemaakt om helderheid te vinden in gesprek en omgeving.",
     praktisch:"Praat je besluit door met verschillende mensen zonder hun advies over te nemen, en voel welke omgeving je het rustigst maakt.",
-    zin:"In het ene gezelschap voel ik me helder, in het andere verward."
+    zin:"In het ene gezelschap voel ik me helder, in het andere verward.",
+    sterk:["Een uitzonderlijk vermogen om helderheid te vinden door goed te luisteren en te praten.","Objectiviteit, doordat je van nature naar buiten gericht bent in plaats van naar binnen.","Gevoeligheid voor welke omgeving en welk gezelschap je goed doet."],
+    valkuil:["Een besluit in je eentje en in stilte proberen te nemen, wat voor dit type juist niet werkt.","Advies van anderen overnemen in plaats van er alleen doorheen te praten.","Een belangrijke keuze maken in een omgeving die je niet rustig maakt."],
+    patroon:"Het patroon is denken dat je er alleen uit moet komen, terwijl jouw helderheid juist buiten jezelf ontstaat, in gesprek en in de juiste omgeving.",
   },
   {
     id:"maan",
     naam:"Maan (Reflectors)",
     wat:"Helderheid komt pas na een volledige maancyclus van ervaren en voelen.",
     praktisch:"Geef jezelf bij grote besluiten letterlijk de tijd van de maan, en praat elke dag met iemand anders over het onderwerp.",
-    zin:"Wat ik vandaag voel is niet per se wat ik morgen voel, en dat is oké."
+    zin:"Wat ik vandaag voel is niet per se wat ik morgen voel, en dat is oké.",
+    sterk:["Een uitzonderlijk breed en eerlijk beeld van een situatie, na verloop van tijd.","Objectiviteit doordat je geen vaste centra hebt die de blik kleuren.","Wijsheid die ontstaat door dingen echt te doorleven, niet door ze te bedenken."],
+    valkuil:["Een grote beslissing nemen op een dag die toevallig helder aanvoelt.","Jezelf onder druk zetten om net zo snel te beslissen als mensen om je heen.","Je mening baseren op één gesprek, in plaats van op de volle cyclus."],
+    patroon:"Het patroon is snel meebewegen met de laatste indruk. Neem voor grote besluiten bewust de tijd van de maan en laat verschillende dagen en gesprekken hun stem laten horen."
   }
 ];
 
 const CENTERS = [
-  {id:"kruin", naam:"Hoofd", thema:"Inspiratie en denkdruk", x:140, y:35, shape:"triangle-down", w:46,
+  {id:"hoofd", naam:"Hoofd", thema:"Inspiratie en denkdruk", x:140, y:35, shape:"triangle-down", w:46,
     gedefinieerd:"Jij bent een constante bron van inspiratie en vragen voor anderen. Er zijn vaste thema's waar jij steeds opnieuw over nadenkt.",
     open:"Jij neemt makkelijk de vragen en denkdruk van anderen over. Dat voelt als mentale onrust die eigenlijk niet van jou is.",
+    sterk_def:"Je hebt een eigen, herkenbare bron van inspiratie en stelt vragen die anderen in beweging zetten.",
+    valkuil_def:"Zo vast blijven hangen in je eigen vragen dat je vergeet dat niet elke vraag om een antwoord vraagt.",
+    sterk_open:"Grote wijsheid over inspiratie en denkdruk in het algemeen, juist omdat je die van alle kanten hebt gezien.",
+    valkuil_open:"Denkdruk van anderen aanzien voor eigen mentale onrust, en er 's nachts van wakker liggen.",
+    patroon:"Open: het patroon is malen over een vraag die eigenlijk niet van jou is. Gedefinieerd: het patroon is denken dat jouw vaste vragen door iedereen gedeeld worden.",
     tip:"Vraag jezelf bij drukke gedachten: is dit mijn vraag, of die van een ander?"},
   {id:"ajna", naam:"Ajna", thema:"Manier van denken", x:140, y:100, shape:"triangle-down", w:50,
     gedefinieerd:"Jij hebt een vaste, herkenbare manier van denken en vormt makkelijk een mening.",
     open:"Jij kunt van alle kanten denken en meningen van anderen proberen, waardoor een eigen mening vasthouden lastig kan zijn.",
+    sterk_def:"Een consistente, betrouwbare manier van denken waar anderen op kunnen bouwen.",
+    valkuil_def:"Denken dat jouw manier van denken de enige juiste is.",
+    sterk_open:"Flexibel en open denken, je kunt meerdere kanten van een verhaal echt begrijpen.",
+    valkuil_open:"Jezelf onder druk zetten om overal een vaste mening over te hebben.",
+    patroon:"Open: het patroon is een mening forceren om zeker over te komen. Gedefinieerd: het patroon is je eigen manier van denken als enige waarheid zien.",
     tip:"Geef jezelf toestemming om 'ik weet het nog niet' te zeggen."},
   {id:"keel", naam:"Keel", thema:"Communicatie en actie", x:140, y:170, shape:"square", w:52,
     gedefinieerd:"Jij hebt een consistente manier waarop je jezelf uit en dingen voor elkaar krijgt.",
     open:"Jij bent gevoelig voor de behoefte om gehoord te worden, en kunt gaan praten om aandacht te krijgen.",
+    sterk_def:"Een betrouwbare, herkenbare stem: mensen weten wat ze aan je hebben als je iets zegt.",
+    valkuil_def:"Blijven praten of doen op de automatische piloot, ook als het niet meer klopt.",
+    sterk_open:"Een fijne antenne voor wat een groep nodig heeft om gehoord te worden, en flexibiliteit in hoe je jezelf uit.",
+    valkuil_open:"Praten om gezien te worden, in plaats van omdat er iets waardevols te zeggen is.",
+    patroon:"Open: het patroon is te snel of te veel praten uit onrust. Gedefinieerd: het patroon is doorpraten in een vaste stijl, ook als niemand meer luistert.",
     tip:"Check voor je spreekt of het al uit je strategie en autoriteit komt, of uit de behoefte om iets te zeggen."},
   {id:"g", naam:"Identiteitscentrum", thema:"Identiteit en richting", x:140, y:240, shape:"diamond", w:56,
     gedefinieerd:"Jij hebt een stabiel gevoel van wie je bent en waar je naartoe gaat.",
     open:"Jouw gevoel van identiteit en richting kan meebewegen met de omgeving en de mensen om je heen.",
+    sterk_def:"Een stabiel, herkenbaar gevoel van eigenheid dat weinig schommelt onder invloed van anderen.",
+    valkuil_def:"Vasthouden aan een vaste zelfbeeld terwijl het leven je eigenlijk vraagt om mee te bewegen.",
+    sterk_open:"Grote flexibiliteit om je aan te passen aan verschillende mensen, plekken en rollen.",
+    valkuil_open:"Jezelf verliezen in de identiteit of richting van een partner, vriendengroep of werkomgeving.",
+    patroon:"Open: het patroon is jezelf steeds opnieuw uitvinden op basis van wie er om je heen is. Gedefinieerd: het patroon is verwachten dat anderen net zo'n vaste richting hebben als jij.",
     tip:"Een vaste plek, ritme of gewoonte geeft jou houvast in wie je bent."},
   {id:"hart", naam:"Hart (ego)", thema:"Wilskracht en eigenwaarde", x:205, y:240, shape:"triangle-right", w:38,
     gedefinieerd:"Jij kunt makkelijk beloftes maken en jezelf bewijzen wanneer dat nodig is.",
     open:"Jij kunt druk voelen om je waarde te bewijzen of afspraken te maken die eigenlijk niet bij je passen.",
+    sterk_def:"Betrouwbare wilskracht: als jij iets belooft, is de kans groot dat het gebeurt.",
+    valkuil_def:"Jezelf blijven bewijzen, ook als daar allang geen aanleiding meer voor is.",
+    sterk_open:"Wijsheid over wat wilskracht wel en niet kan, en over wanneer bewijzen zinloos is.",
+    valkuil_open:"Beloftes doen om waardering te krijgen, en daar later spijt van hebben.",
+    patroon:"Open: het patroon is jezelf bewijzen voor erkenning die niet duurzaam voelt. Gedefinieerd: het patroon is doorgaan op wilskracht terwijl de energie eigenlijk op is.",
     tip:"Je hoeft jezelf niets te bewijzen. Rust nemen is ook een geldig antwoord."},
   {id:"milt", naam:"Milt", thema:"Intuïtie en gezondheid", x:75, y:305, shape:"triangle-left", w:46,
     gedefinieerd:"Jij hebt toegang tot een stille, directe intuïtie over wat goed en veilig voor je is.",
     open:"Jij kunt gevoelig zijn voor angst en zorgen die niet van jou zijn, of juist over je eigen grenzen heen gaan.",
+    sterk_def:"Een constante, betrouwbare intuïtie voor gezondheid, veiligheid en wat wel of niet goed voor je is.",
+    valkuil_def:"Zo gewend zijn aan je eigen intuïtie dat je vergeet hoe waardevol en zeldzaam die is.",
+    sterk_open:"Grote wijsheid over angst en risico, juist doordat je die van dichtbij hebt leren kennen.",
+    valkuil_open:"Angst of zorgen van anderen overnemen alsof het je eigen signaal is, of juist eigen grenzen negeren.",
+    patroon:"Open: het patroon is te lang blijven in iets ongezonds omdat het signaal niet duidelijk genoeg voelde. Gedefinieerd: het patroon is te snel over je eigen intuïtie heen stappen omdat die zo vanzelfsprekend is.",
     tip:"Geef signalen van je lijf serieuze aandacht, ook de hele zachte."},
   {id:"solar", naam:"Solar plexus", thema:"Gevoel en sfeer", x:205, y:305, shape:"triangle-right", w:46,
     gedefinieerd:"Jij hebt een eigen emotionele golfbeweging, met pieken en dalen die van jou zijn.",
     open:"Jij neemt makkelijk de emoties en sfeer van anderen over, alsof het je eigen gevoelens zijn.",
+    sterk_def:"Emotionele diepgang en een golf die, mits je haar de tijd geeft, tot heldere besluiten leidt.",
+    valkuil_def:"Denken dat jouw huidige emotie de waarheid is, in plaats van een golf die nog beweegt.",
+    sterk_open:"Een uitzonderlijk fijne antenne voor sfeer en emotie in een ruimte, en groot empathisch vermogen.",
+    valkuil_open:"Conflicten vermijden uit angst voor de emotionele lading, of juist emoties van anderen overnemen als je eigen stemming.",
+    patroon:"Open: het patroon is de sfeer in een ruimte overnemen en denken dat het jouw eigen gevoel is. Gedefinieerd: het patroon is een besluit nemen op de top of de bodem van je eigen golf.",
     tip:"Vraag jezelf in een drukke ruimte: is dit mijn emotie, of voel ik die van een ander?"},
   {id:"sacraal", naam:"Sacraal", thema:"Levensenergie", x:140, y:355, shape:"square", w:52,
     gedefinieerd:"Jij hebt een constante bron van energie voor werk dat bij je past.",
     open:"Jij kunt moeite hebben met grenzen aan werk en energie, en te lang doorgaan voor je het doorhebt.",
+    sterk_def:"Een betrouwbare, haast onuitputtelijke motor zodra je met het juiste bezig bent.",
+    valkuil_def:"Doorgaan tot ver voorbij het punt waarop rust nodig was.",
+    sterk_open:"Wijsheid over energie en duurzaamheid, en het vermogen om te herkennen wanneer iemand anders opbrandt.",
+    valkuil_open:"De energie van anderen overnemen en jezelf voorbij je eigen grenzen laten werken.",
+    patroon:"Open: het patroon is doorwerken op andermans energie tot je leeg bent. Gedefinieerd: het patroon is doorgaan omdat de motor nu eenmaal loopt, ook als het al lang geen energie meer geeft.",
     tip:"Neem rust voordat je moe bent, niet pas erna."},
   {id:"wortel", naam:"Wortel", thema:"Druk en drive", x:140, y:430, shape:"square", w:52,
     gedefinieerd:"Jij hebt een gestage druk in je systeem die je in beweging zet.",
     open:"Jij kunt gevoelig zijn voor de haast en stress van anderen om je heen.",
+    sterk_def:"Een constante, hanteerbare drive die je in beweging houdt zonder dat het je overspoelt.",
+    valkuil_def:"Jezelf blijven opjagen ook wanneer er geen reden meer is voor haast.",
+    sterk_open:"Grote wijsheid over druk en stress, en het vermogen om te herkennen wanneer haast zinloos is.",
+    valkuil_open:"De haast van anderen overnemen en denken dat het jouw eigen urgentie is.",
+    patroon:"Open: het patroon is meegezogen worden in de stress van een drukke omgeving. Gedefinieerd: het patroon is jezelf blijven opjagen op een druk die eigenlijk al lang is afgenomen.",
     tip:"Vertraag bewust wanneer je haast voelt die niet logisch aanvoelt, dat is vaak niet jouw haast."}
 ];
 
 const LINES = [
-  {nr:"1", naam:"Onderzoeker", thema:"Fundament en zekerheid", omschrijving:"Jij hebt een diepe behoefte aan een stevig fundament. Je voelt je op je best als je een onderwerp grondig hebt onderzocht en echt begrijpt hoe iets werkt.", tip:"Geef jezelf de tijd om dingen uit te zoeken voor je je ergens aan verbindt, dat is geen aarzelen maar hoe jij zekerheid opbouwt."},
-  {nr:"2", naam:"Kluizenaar", thema:"Natuurlijk talent", omschrijving:"Jij hebt van nature talent voor bepaalde dingen, vaak zonder dat je het zelf zo bijzonder vindt. Je hebt afwisseling nodig tussen alleen zijn en uitgenodigd worden.", tip:"Bescherm je tijd alleen, dat is waar je talent zich oplaadt, niet waar je aan het verstoppen bent."},
-  {nr:"3", naam:"Martelaar", thema:"Leren door ervaring", omschrijving:"Jij leert het beste door te doen, te proberen en soms tegen iets aan te lopen. Wat niet werkt is voor jou net zo waardevolle informatie als wat wel werkt.", tip:"Zie een misstap niet als falen, maar als het bewijsmateriaal dat jij nodig had om verder te komen."},
-  {nr:"4", naam:"Opportunist", thema:"Netwerk en relaties", omschrijving:"Jouw kansen en mogelijkheden komen vooral via mensen die je al kent. Een hecht netwerk is voor jou geen bijzaak, het is de basis van hoe je vooruitkomt.", tip:"Investeer bewust in een paar goede, oprechte relaties in plaats van een groot los netwerk."},
-  {nr:"5", naam:"Ketter", thema:"Gezien worden als oplosser", omschrijving:"Anderen projecteren makkelijk verwachtingen op jou, ze zien in jou vaak iemand die iets voor hen kan oplossen, voor je zelf iets hebt gezegd of gedaan.", tip:"Wees praktisch en duidelijk over wat je wel en niet kunt bieden, dat voorkomt teleurstelling aan beide kanten."},
-  {nr:"6", naam:"Rolmodel", thema:"Voorbeeld door de tijd heen", omschrijving:"Jouw leven verloopt in fases: eerst onderzoeken en ervaren, dan een periode van terugtrekken en observeren, en daarna leven als een levend voorbeeld voor anderen.", tip:"Heb geduld met de terugtrekfase, die is geen stilstand maar de plek waar je wijsheid neerslaat."}
+  {nr:"1", naam:"Onderzoeker", thema:"Fundament en zekerheid", omschrijving:"Jij hebt een diepe behoefte aan een stevig fundament. Je voelt je op je best als je een onderwerp grondig hebt onderzocht en echt begrijpt hoe iets werkt.", sterk:"Grondigheid: als jij iets zegt te weten, klopt het ook echt.", valkuil:"Zo lang blijven uitzoeken dat je nooit begint, uit angst iets over het hoofd te zien.", tip:"Geef jezelf de tijd om dingen uit te zoeken voor je je ergens aan verbindt, dat is geen aarzelen maar hoe jij zekerheid opbouwt."},
+  {nr:"2", naam:"Kluizenaar", thema:"Natuurlijk talent", omschrijving:"Jij hebt van nature talent voor bepaalde dingen, vaak zonder dat je het zelf zo bijzonder vindt. Je hebt afwisseling nodig tussen alleen zijn en uitgenodigd worden.", sterk:"Natuurlijk talent dat moeiteloos oogt voor anderen, ook al voelt het voor jou heel gewoon.", valkuil:"Jezelf afsluiten uit gewoonte, ook wanneer een uitnodiging eigenlijk goed zou doen.", tip:"Bescherm je tijd alleen, dat is waar je talent zich oplaadt, niet waar je aan het verstoppen bent."},
+  {nr:"3", naam:"Martelaar", thema:"Leren door ervaring", omschrijving:"Jij leert het beste door te doen, te proberen en soms tegen iets aan te lopen. Wat niet werkt is voor jou net zo waardevolle informatie als wat wel werkt.", sterk:"Praktische, doorleefde wijsheid die je alleen via ervaring opbouwt.", valkuil:"Jezelf afkraken om iets dat achteraf gewoon een leerervaring bleek te zijn.", tip:"Zie een misstap niet als falen, maar als het bewijsmateriaal dat jij nodig had om verder te komen."},
+  {nr:"4", naam:"Opportunist", thema:"Netwerk en relaties", omschrijving:"Jouw kansen en mogelijkheden komen vooral via mensen die je al kent. Een hecht netwerk is voor jou geen bijzaak, het is de basis van hoe je vooruitkomt.", sterk:"Trouwe, warme relaties die over jaren heen blijven bestaan en je verder helpen.", valkuil:"Vasthouden aan een relatie of netwerk dat je allang ontgroeid bent, uit loyaliteit.", tip:"Investeer bewust in een paar goede, oprechte relaties in plaats van een groot los netwerk."},
+  {nr:"5", naam:"Ketter", thema:"Gezien worden als oplosser", omschrijving:"Anderen projecteren makkelijk verwachtingen op jou, ze zien in jou vaak iemand die iets voor hen kan oplossen, voor je zelf iets hebt gezegd of gedaan.", sterk:"Een natuurlijke, praktische impact op groepen, ook zonder dat je je best hoeft te doen.", valkuil:"Verwachtingen van anderen proberen waar te maken die helemaal niet bij je passen.", tip:"Wees praktisch en duidelijk over wat je wel en niet kunt bieden, dat voorkomt teleurstelling aan beide kanten."},
+  {nr:"6", naam:"Rolmodel", thema:"Voorbeeld door de tijd heen", omschrijving:"Jouw leven verloopt in fases: eerst onderzoeken en ervaren, dan een periode van terugtrekken en observeren, en daarna leven als een levend voorbeeld voor anderen.", sterk:"Overzicht en integriteit die, eenmaal opgebouwd, anderen oprecht inspireren.", valkuil:"Jezelf in de observatiefase veroordelen als afstandelijk of niet betrokken genoeg.", tip:"Heb geduld met de terugtrekfase, die is geen stilstand maar de plek waar je wijsheid neerslaat."}
+];
+
+const DEFINITIE = [
+  {id:"geen", naam:"Geen definitie", omschrijving:"Je hebt geen enkel gedefinieerd centrum. Dit is uniek voor Reflectors: jouw hele ontwerp is open en daarmee ontworpen om de gezondheid van je omgeving te weerspiegelen.",
+    sterk:"Een compleet open, objectief systeem zonder eigen vaste kleuring, waardoor je feilloos aanvoelt of een plek of groep gezond is.",
+    valkuil:"Jezelf constant vergelijken met mensen die wel vaste energie hebben, en denken dat er iets mist.",
+    patroon:"Het patroon is jezelf onder druk zetten om net zo consistent te zijn als mensen met een gedefinieerd ontwerp, terwijl verandering van dag tot dag voor jou juist normaal en gezond is."},
+  {id:"single", naam:"Single definitie", omschrijving:"Al jouw gedefinieerde centra hangen aan elkaar in één geheel. Er is een ononderbroken stroom van energie door je ontwerp.",
+    sterk:"Een consistente, in zichzelf besloten energie. Je hebt niemand anders nodig om je eigen systeem compleet te laten voelen.",
+    valkuil:"Zo zelfvoorzienend zijn dat je moeite hebt om anderen echt dichtbij te laten of samen te werken.",
+    patroon:"Het patroon is denken dat je alles zelf moet oplossen, terwijl verbinding met anderen voor jou een aanvulling is, geen noodzaak om compleet te zijn."},
+  {id:"split", naam:"Split definitie", omschrijving:"Jouw gedefinieerde centra vormen twee losse groepen die niet rechtstreeks met elkaar verbonden zijn.",
+    sterk:"Je hebt een natuurlijke aantrekkingskracht op mensen of ervaringen die de brug tussen jouw twee helften vormen, wat voor verrassend goede aanvullingen zorgt.",
+    valkuil:"Je soms verdeeld voelen, alsof er twee delen in je zijn die niet vanzelf met elkaar praten.",
+    patroon:"Het patroon is naar de verbindende persoon of ervaring zoeken en, als die er niet is, een innerlijk gemis voelen. Dat gemis is geen fout in je ontwerp, het is de ruimte die uitnodigt tot verbinding met anderen."},
+  {id:"triple", naam:"Triple split definitie", omschrijving:"Jouw gedefinieerde centra vormen drie losse groepen.",
+    sterk:"Een breed en veelzijdig systeem, met meerdere eigen vaste bronnen van energie en inzicht tegelijk.",
+    valkuil:"Meerdere bruggen tegelijk nodig hebben, wat je afhankelijker kan maken van de juiste mensen op het juiste moment.",
+    patroon:"Het patroon is merken dat je op meerdere vlakken tegelijk naar aanvulling zoekt. Dat vraagt om een breder netwerk in plaats van één persoon die alles moet verbinden."},
+  {id:"quadruple", naam:"Quadruple split definitie", omschrijving:"Jouw gedefinieerde centra vormen vier losse groepen. Dit is zeldzaam.",
+    sterk:"Een zeer veelzijdig systeem met sterk uiteenlopende eigen kwaliteiten, dat om een breed netwerk van mensen vraagt om zich compleet te voelen.",
+    valkuil:"Je afhankelijk voelen van veel verschillende mensen tegelijk om je helemaal jezelf te voelen.",
+    patroon:"Het patroon is het gevoel dat er nooit één persoon is die alles in je aanvult. Een breed, divers netwerk is voor jou geen bijzaak maar een basisbehoefte."}
+];
+
+const VARIABLE_DOMAINS = [
+  {id:"determination", naam:"Digestie", vraag:"Hoe jij het beste voeding en informatie opneemt", bron:"Design Zon (onbewust, lichaam)",
+    links:"Actief: jij werkt het beste met structuur en regelmaat, zoals vaste eet- en rustmomenten waar je bewust en gefocust bij blijft.",
+    rechts:"Receptief: jij werkt het beste als je het loslaat, met een flexibel en intuïtief ritme rond eten en informatie, in plaats van een vast schema."},
+  {id:"environment", naam:"Omgeving", vraag:"In welk soort omgeving jij het beste tot je recht komt", bron:"Design Maansknoop (onbewust, lichaam)",
+    links:"Actief: jij komt het beste tot je recht in een omgeving waar je zelf actief deel van uitmaakt, midden in de groep of de bedrijvigheid.",
+    rechts:"Receptief: jij komt het beste tot je recht als waarnemer, met wat afstand tot de drukte, van waaruit je goed kunt observeren."},
+  {id:"motivation", naam:"Motivatie", vraag:"Wat jou vanuit je hoofd in beweging zet", bron:"Personality Zon (bewust, geest)",
+    links:"Actief: jouw motivatie komt op gang door zelf te handelen en initiatief te nemen.",
+    rechts:"Receptief: jouw motivatie komt op gang door eerst waar te nemen en te overdenken, voor je in actie komt."},
+  {id:"perspective", naam:"Perspectief", vraag:"Hoe jij de wereld bewust waarneemt", bron:"Personality Maansknoop (bewust, geest)",
+    links:"Actief: jij neemt de wereld gefocust waar, gericht op één ding tegelijk.",
+    rechts:"Receptief: jij neemt de wereld breed waar, met oog voor het geheel en de samenhang."}
+];
+
+const TONES = [
+  {nr:1, zintuig:"Reuk", thema:"Zekerheid", omschrijving:"Jij checkt onbewust via een soort 'geur' of iets of iemand veilig en betrouwbaar aanvoelt, vaak al bij een eerste indruk of eerste ontmoeting.", sterk:"Een snel, instinctief aanvoelen van wat wel en niet veilig is.", valkuil:"Een eerste indruk zo absoluut maken dat niemand of niets nog een tweede kans krijgt.", tip:"Vertrouw die eerste indruk, maar geef jezelf ook toestemming om hem bij te stellen zodra er nieuwe informatie komt."},
+  {nr:2, zintuig:"Smaak", thema:"Onzekerheid", omschrijving:"Jij hebt tijd en herhaling nodig om ergens 'de smaak' van te pakken te krijgen. Het eerste proefmoment is voor jou zelden het laatste woord.", sterk:"Geduld om iets meerdere keren te proeven voor je er een oordeel over vormt.", valkuil:"Jezelf, iets of iemand meteen afschrijven na één mindere ervaring.", tip:"Geef iets of iemand minstens een paar kansen voor je een definitief oordeel velt."},
+  {nr:3, zintuig:"Uiterlijke visie (zicht)", thema:"Vertrouwen", omschrijving:"Jij vertrouwt vooral wat je met eigen ogen ziet, het liefst doordat je het zelf uitprobeert en ervaart, met vallen en opstaan.", sterk:"Praktisch, doorleefd vertrouwen dat pas echt landt na eigen ervaring.", valkuil:"Advies van anderen wegwuiven omdat je het zelf nog niet gezien hebt.", tip:"Geef jezelf de ruimte om te experimenteren, dat is precies waar jouw vertrouwen vandaan komt."},
+  {nr:4, zintuig:"Aanraking", thema:"Vastberadenheid", omschrijving:"Jij weet door aanraking, letterlijk of figuurlijk 'voeling' krijgen met iets of iemand, wanneer je vastberaden ergens voor kunt gaan.", sterk:"Standvastigheid zodra je eenmaal echt voeling hebt met iets of iemand.", valkuil:"Vasthouden aan een besluit uit koppigheid, ook wanneer die voeling er allang niet meer is.", tip:"Blijf checken of het contact of de situatie nog steeds klopt, in plaats van je eerdere vastberadenheid als vaststaand feit te nemen."},
+  {nr:5, zintuig:"Innerlijke visie", thema:"Acceptatie", omschrijving:"Jij ziet van binnenuit helder wat er nodig is, en verwacht al snel dat anderen dat net zo vanzelfsprekend waarnemen. Acceptatie is voor jou vaak het grootste leerthema.", sterk:"Een innerlijk beeld dat, eenmaal gedeeld, anderen echt kan helpen.", valkuil:"Teleurgesteld raken als anderen jouw innerlijke visie niet vanzelf delen of begrijpen.", tip:"Deel je innerlijke beeld actief in woorden, in plaats van te verwachten dat anderen het al aanvoelen."},
+  {nr:6, zintuig:"Gehoor", thema:"Identificatie / gevoel", omschrijving:"Jij herkent via wat je hoort, de toon, de woorden, het verhaal van een ander, of iets bij je past en wie je zelf bent.", sterk:"Een fijn oor voor waarheid en oprechtheid in wat iemand zegt.", valkuil:"Jezelf identificeren met een verhaal of oordeel dat je toevallig ergens hebt opgevangen.", tip:"Luister goed, maar toets wat je hoort altijd nog even aan je eigen strategie en autoriteit."}
 ];
 
 const PROFILES = [
-  {id:"1-3", naam:"1/3 · Onderzoeker / Martelaar", uitleg:"Bouwt zekerheid op via studie, en test die kennis vervolgens in de praktijk. Een wisselvallig pad dat leidt tot echte, zelf ervaren wijsheid."},
-  {id:"1-4", naam:"1/4 · Onderzoeker / Opportunist", uitleg:"Bouwt een fundament van kennis op, en deelt dat vervolgens via een klein, vertrouwd netwerk van mensen."},
-  {id:"2-4", naam:"2/4 · Kluizenaar / Opportunist", uitleg:"Heeft natuurlijk talent dat het beste tot bloei komt binnen een select netwerk, en moet daarvoor wel worden uitgenodigd."},
-  {id:"2-5", naam:"2/5 · Kluizenaar / Ketter", uitleg:"Een teruggetrokken talent dat van een afstand aantrekkingskracht heeft, anderen zien al snel een mogelijke oplosser in jou."},
-  {id:"3-5", naam:"3/5 · Martelaar / Ketter", uitleg:"Leert door vallen en opstaan, en wordt daarna door anderen gezien als een praktische probleemoplosser."},
-  {id:"3-6", naam:"3/6 · Martelaar / Rolmodel", uitleg:"Een leven vol ervaring en beproeving, dat na verloop van tijd uitgroeit tot een voorbeeldfunctie voor anderen."},
-  {id:"4-6", naam:"4/6 · Opportunist / Rolmodel", uitleg:"Bouwt via een hecht netwerk, en groeit na verloop van tijd uit tot een gezaghebbend voorbeeld voor die kring."},
-  {id:"4-1", naam:"4/1 · Opportunist / Onderzoeker", uitleg:"Een netwerk van vertrouwde mensen, gedragen door een stevig fundament van eigen kennis en onderzoek."},
-  {id:"5-1", naam:"5/1 · Ketter / Onderzoeker", uitleg:"Wordt door anderen gezien als de oplosser, met een grondig onderzocht fundament als stevige basis daaronder."},
-  {id:"5-2", naam:"5/2 · Ketter / Kluizenaar", uitleg:"Anderen projecteren verwachtingen op een van nature teruggetrokken talent, dat het beste werkt met genoeg tijd alleen."},
-  {id:"6-2", naam:"6/2 · Rolmodel / Kluizenaar", uitleg:"Een voorbeeldfunctie die rust op natuurlijk talent, met een blijvende behoefte aan periodes van rust en afzondering."},
-  {id:"6-3", naam:"6/3 · Rolmodel / Martelaar", uitleg:"Wijsheid die ontstaat door vallen en opstaan, en die uiteindelijk verandert in een levend voorbeeld voor anderen."}
+  {id:"1-3", naam:"1/3 · Onderzoeker / Martelaar", uitleg:"Bouwt zekerheid op via studie, en test die kennis vervolgens in de praktijk. Een wisselvallig pad dat leidt tot echte, zelf ervaren wijsheid.",
+    sterk:"Kennis die niet alleen klopt op papier maar ook in de praktijk is beproefd.", valkuil:"Elke misstap als persoonlijk falen ervaren, terwijl het gewoon onderdeel is van hoe jij leert.", patroon:"Een wisselvallig, soms schoksgewijs pad. Wat van buitenaf instabiel oogt, is voor jou de manier waarop stevige, doorleefde kennis ontstaat."},
+  {id:"1-4", naam:"1/4 · Onderzoeker / Opportunist", uitleg:"Bouwt een fundament van kennis op, en deelt dat vervolgens via een klein, vertrouwd netwerk van mensen.",
+    sterk:"Een stevige, goed onderbouwde basis die je met overtuiging deelt binnen je eigen kring.", valkuil:"Je zo terugtrekken in studie dat het netwerk waar je kennis eigenlijk voor bedoeld is, verwatert.", patroon:"Het patroon is eerst grondig alleen uitzoeken, en dan pas, via mensen die je al kent, verder komen. Een groot, los netwerk werkt voor jou minder goed dan een klein en hecht."},
+  {id:"2-4", naam:"2/4 · Kluizenaar / Opportunist", uitleg:"Heeft natuurlijk talent dat het beste tot bloei komt binnen een select netwerk, en moet daarvoor wel worden uitgenodigd.",
+    sterk:"Onopvallend, natuurlijk talent dat door de juiste mensen wordt herkend en gewaardeerd.", valkuil:"Jezelf te veel afsluiten, waardoor de uitnodigingen die je nodig hebt, uitblijven.", patroon:"Het patroon is wisselen tussen teruggetrokken zijn en toch, via je vertrouwde kring, naar buiten komen. Beide horen bij jou, het is geen tegenstrijdigheid."},
+  {id:"2-5", naam:"2/5 · Kluizenaar / Ketter", uitleg:"Een teruggetrokken talent dat van een afstand aantrekkingskracht heeft, anderen zien al snel een mogelijke oplosser in jou.",
+    sterk:"Een natuurlijke aantrekkingskracht, ook zonder dat je jezelf op de voorgrond plaatst.", valkuil:"Verwachtingen van vreemden proberen waar te maken die niets met je eigen talent te maken hebben.", patroon:"Het patroon is uit je rust gehaald worden door projecties van buitenaf. Wees duidelijk over wat je wel en niet kunt bieden, dat beschermt je eigen ruimte."},
+  {id:"3-5", naam:"3/5 · Martelaar / Ketter", uitleg:"Leert door vallen en opstaan, en wordt daarna door anderen gezien als een praktische probleemoplosser.",
+    sterk:"Praktische, doorleefde oplossingen die je uit eigen ervaring hebt opgebouwd.", valkuil:"Grote druk voelen om altijd de oplossing te hebben, ook wanneer je zelf nog aan het uitzoeken bent.", patroon:"Het patroon is dat anderen sneller vertrouwen in je hebben dan jijzelf op dat moment voelt. Geef jezelf de ruimte om ook fouten zichtbaar te maken."},
+  {id:"3-6", naam:"3/6 · Martelaar / Rolmodel", uitleg:"Een leven vol ervaring en beproeving, dat na verloop van tijd uitgroeit tot een voorbeeldfunctie voor anderen.",
+    sterk:"Wijsheid die stevig geworteld is in echte, doorleefde ervaring, niet in theorie.", valkuil:"Jezelf blijven veroordelen om oude missers, ook nadat je er allang van geleerd hebt.", patroon:"Een leven in twee fases: eerst volop ervaren en soms struikelen, later leven als een geloofwaardig voorbeeld juist dankzij die eerdere jaren."},
+  {id:"4-6", naam:"4/6 · Opportunist / Rolmodel", uitleg:"Bouwt via een hecht netwerk, en groeit na verloop van tijd uit tot een gezaghebbend voorbeeld voor die kring.",
+    sterk:"Warme, langdurige relaties die uitgroeien tot een natuurlijk gezag binnen je eigen kring.", valkuil:"Vasthouden aan oude relaties of een oude rol, ook als je allang bent doorgegroeid.", patroon:"Het patroon is jezelf pas laat echt zichtbaar durven maken als voorbeeld, terwijl je omgeving je die rol vaak al veel eerder toevertrouwt."},
+  {id:"4-1", naam:"4/1 · Opportunist / Onderzoeker", uitleg:"Een netwerk van vertrouwde mensen, gedragen door een stevig fundament van eigen kennis en onderzoek.",
+    sterk:"De combinatie van een grondige eigen basis en een netwerk dat je serieus neemt om wat je weet.", valkuil:"Zo gehecht raken aan zekerheid dat je een kans binnen je netwerk laat lopen omdat je nog niet 'genoeg' weet.", patroon:"Het patroon is eerst willen weten, dan pas delen. Onthoud dat je netwerk vaak al vertrouwen in je heeft voordat jijzelf het gevoel hebt er klaar voor te zijn."},
+  {id:"5-1", naam:"5/1 · Ketter / Onderzoeker", uitleg:"Wordt door anderen gezien als de oplosser, met een grondig onderzocht fundament als stevige basis daaronder.",
+    sterk:"Oplossingen die niet alleen praktisch werken, maar ook goed doordacht en onderbouwd zijn.", valkuil:"De verwachtingen van anderen aannemen voordat je zelf het gevoel hebt voldoende te weten.", patroon:"Het patroon is sneller een oplosser-rol krijgen dan je eigen tempo van uitzoeken bijhoudt. Wees eerlijk over wat je al wel en nog niet zeker weet."},
+  {id:"5-2", naam:"5/2 · Ketter / Kluizenaar", uitleg:"Anderen projecteren verwachtingen op een van nature teruggetrokken talent, dat het beste werkt met genoeg tijd alleen.",
+    sterk:"Talent dat, juist door de afstand die je bewaart, extra aantrekkingskracht en geloofwaardigheid krijgt.", valkuil:"Je constant onderbroken voelen in je rust door verwachtingen die niet bij je passen.", patroon:"Het patroon is uitnodigingen krijgen op momenten dat je eigenlijk alleen wilt zijn. Bescherm je tijd alleen, dat is waar je talent vandaan komt."},
+  {id:"6-2", naam:"6/2 · Rolmodel / Kluizenaar", uitleg:"Een voorbeeldfunctie die rust op natuurlijk talent, met een blijvende behoefte aan periodes van rust en afzondering.",
+    sterk:"Een geloofwaardige voorbeeldrol die niet geforceerd aanvoelt, omdat die op echt talent rust.", valkuil:"Jezelf schuldig voelen over de behoefte aan afzondering, terwijl die juist nodig is om op te laden.", patroon:"Het patroon is heen en weer bewegen tussen zichtbaar zijn voor anderen en je terugtrekken om op te laden. Beide fases zijn voor jou nodig, niet in strijd met elkaar."},
+  {id:"6-3", naam:"6/3 · Rolmodel / Martelaar", uitleg:"Wijsheid die ontstaat door vallen en opstaan, en die uiteindelijk verandert in een levend voorbeeld voor anderen.",
+    sterk:"Voorbeeldfunctie die geloofwaardig is, juist omdat je de fouten en omwegen zelf hebt doorleefd.", valkuil:"Jezelf blijven meten aan een vroegere periode vol beproevingen, terwijl je daar allang doorheen bent.", patroon:"Een leven met duidelijke fases: eerst volop experimenteren en soms struikelen, en daarna, met die ervaring als fundament, een levend voorbeeld worden voor anderen."}
 ];
 
 function renderLines(){
@@ -641,127 +856,199 @@ function renderProfiles(){
 }
 
 const GATES = [
-  {nr:1, naam:"Zelfexpressie", omschrijving:"Jouw unieke, creatieve manier om jezelf te laten zien."},
-  {nr:2, naam:"Richting", omschrijving:"Een innerlijk kompas dat de weg wijst, ook als je dat zelf niet altijd doorhebt."},
-  {nr:3, naam:"Orde uit chaos", omschrijving:"Het vermogen om structuur te scheppen in een nieuwe, rommelige situatie."},
-  {nr:4, naam:"Logica", omschrijving:"De behoefte aan een logische verklaring en antwoorden op vragen."},
-  {nr:5, naam:"Vaste patronen", omschrijving:"Comfort en kracht die ontstaan uit een vast ritme."},
-  {nr:6, naam:"Wrijving", omschrijving:"Het gevoel dat wrijving soms nodig is om nader tot elkaar te komen."},
-  {nr:7, naam:"Leiderschap", omschrijving:"De rol om richting te geven aan een groep, zonder dat je de leider hoeft te zijn."},
-  {nr:8, naam:"Bijdrage", omschrijving:"De behoefte om je unieke stijl zichtbaar te maken en bij te dragen."},
-  {nr:9, naam:"Focus", omschrijving:"Het vermogen om in kleine details vast te houden en af te maken."},
-  {nr:10, naam:"Zelfliefde", omschrijving:"Gedrag dat voortkomt uit trouw zijn aan wie je bent."},
-  {nr:11, naam:"Ideeën", omschrijving:"Een stroom van gedachten en concepten die gedeeld willen worden."},
-  {nr:12, naam:"Voorzichtigheid", omschrijving:"Het gevoel wanneer je wel of juist niet moet spreken."},
-  {nr:13, naam:"De luisteraar", omschrijving:"Vertrouwen winnen doordat mensen hun verhaal bij je kwijt kunnen."},
-  {nr:14, naam:"Slagkracht", omschrijving:"Brandstof en drive voor werk dat betekenis heeft."},
-  {nr:15, naam:"Uitersten", omschrijving:"Het omarmen van de volle breedte van het leven, met pieken en dalen."},
-  {nr:16, naam:"Vaardigheid", omschrijving:"Enthousiasme en talent dat verfijnd wil worden tot meesterschap."},
-  {nr:17, naam:"Meningen", omschrijving:"Een scherpe blik die patronen en logische verbanden ziet."},
-  {nr:18, naam:"Correctie", omschrijving:"Het vermogen om te zien wat beter kan, en dat te verbeteren."},
-  {nr:19, naam:"Behoefte", omschrijving:"Gevoeligheid voor wat jij en anderen nodig hebben om je verbonden te voelen."},
-  {nr:20, naam:"Het nu", omschrijving:"Aanwezig zijn in het huidige moment, en daaruit handelen."},
-  {nr:21, naam:"Controle", omschrijving:"De wens om je eigen plek en middelen te beheren."},
-  {nr:22, naam:"Gratie", omschrijving:"Sociale openheid en emotionele charme."},
-  {nr:23, naam:"Assimilatie", omschrijving:"Het simpel uitleggen van een inzicht dat eerst ingewikkeld leek."},
-  {nr:24, naam:"Terugkeer", omschrijving:"Steeds opnieuw nadenken tot een gedachte helder is."},
-  {nr:25, naam:"Onschuld", omschrijving:"Een universele liefde voor het leven zelf, ongeacht de omstandigheden."},
-  {nr:26, naam:"De verkoper", omschrijving:"Het vermogen om iets of jezelf overtuigend neer te zetten."},
-  {nr:27, naam:"Zorgen", omschrijving:"De zorg voor jezelf en anderen, en verantwoord beheer van middelen."},
-  {nr:28, naam:"Het spel", omschrijving:"De zoektocht naar een leven met betekenis, soms via risico."},
-  {nr:29, naam:"Volhouden", omschrijving:"De kracht om volledig ja te zeggen tegen een ervaring."},
-  {nr:30, naam:"Verlangen", omschrijving:"Intense gevoelens en verlangens die om ervaring vragen."},
-  {nr:31, naam:"Invloed", omschrijving:"Een stem die gehoord wordt en anderen kan leiden."},
-  {nr:32, naam:"Continuïteit", omschrijving:"Aanvoelen wat wel en niet stand zal houden op langere termijn."},
-  {nr:33, naam:"Privacy", omschrijving:"De behoefte aan terugtrekken en later delen wat je hebt geleerd."},
-  {nr:34, naam:"Kracht", omschrijving:"Pure, krachtige levensenergie die om beweging vraagt."},
-  {nr:35, naam:"Vooruitgang", omschrijving:"De wens om steeds nieuwe ervaringen op te doen."},
-  {nr:36, naam:"Crisis", omschrijving:"Emotionele intensiteit die vraagt om doorleefd te worden."},
-  {nr:37, naam:"Vriendschap", omschrijving:"De wens om warmte, familie en gelijkwaardigheid te creëren."},
-  {nr:38, naam:"Verzet", omschrijving:"De wens om te vechten voor wat écht belangrijk is."},
-  {nr:39, naam:"Provocatie", omschrijving:"Het losmaken van vaste patronen bij anderen, soms door tegendraads te zijn."},
-  {nr:40, naam:"Alleen zijn", omschrijving:"De behoefte aan eigen tijd na hard werken, om op te laden."},
-  {nr:41, naam:"Verlangen naar nieuw", omschrijving:"De eerste impuls en fantasie die iets nieuws in gang zet."},
-  {nr:42, naam:"Groei", omschrijving:"Het afronden van een cyclus, gedreven door groei."},
-  {nr:43, naam:"Inzicht", omschrijving:"Een plotseling doorbrekend inzicht dat niet altijd uit te leggen is."},
-  {nr:44, naam:"Alertheid", omschrijving:"Een instinctief aanvoelen van patronen uit het verleden."},
-  {nr:45, naam:"De verzamelaar", omschrijving:"De rol om een groep of gemeenschap te verzamelen en te leiden."},
-  {nr:46, naam:"Toewijding", omschrijving:"Geluk en succes door volledig aanwezig te zijn in je lichaam en leven."},
-  {nr:47, naam:"Verwerking", omschrijving:"Het duiden van ervaringen, soms pas jaren later begrepen."},
-  {nr:48, naam:"Diepgang", omschrijving:"De diepte en kennis die nodig is om iets goed op te lossen."},
-  {nr:49, naam:"Principes", omschrijving:"Sterke persoonlijke waarden over wat wel en niet oké is."},
-  {nr:50, naam:"Waarden", omschrijving:"Verantwoordelijkheid voor het bewaken van waarden binnen een groep."},
-  {nr:51, naam:"Schrik", omschrijving:"De schok die soms nodig is om uit je comfortzone te komen."},
-  {nr:52, naam:"Stilte", omschrijving:"De kracht van bewust stilzitten en focussen."},
-  {nr:53, naam:"Beginnen", omschrijving:"De energie om ergens aan te beginnen, zonder garantie op afmaken."},
-  {nr:54, naam:"Ambitie", omschrijving:"De drive om jezelf naar boven te werken en vooruit te komen."},
-  {nr:55, naam:"Geestkracht", omschrijving:"Emotionele diepgang, afhankelijk van innerlijke rijkdom in plaats van omstandigheden."},
-  {nr:56, naam:"Stimulatie", omschrijving:"Het vertellen van verhalen die anderen boeien en meenemen."},
-  {nr:57, naam:"Intuïtieve helderheid", omschrijving:"Een helder, in het nu aanwezig aanvoelen van wat veilig is."},
-  {nr:58, naam:"Levenslust", omschrijving:"Puur plezier en vitaliteit, ook in het verbeteren van dingen."},
-  {nr:59, naam:"Verbinding", omschrijving:"De wens om intieme, oprechte verbinding met een ander te maken."},
-  {nr:60, naam:"Acceptatie", omschrijving:"Het accepteren van beperkingen als voorwaarde voor iets nieuws."},
-  {nr:61, naam:"Mysterie", omschrijving:"Een innerlijke drang om te begrijpen wat niet direct te verklaren is."},
-  {nr:62, naam:"Details", omschrijving:"Het overbrengen van feiten en details op een concrete manier."},
-  {nr:63, naam:"Twijfel", omschrijving:"Een kritische geest die twijfelt om fouten te voorkomen."},
-  {nr:64, naam:"Verwarring", omschrijving:"Een hoofd vol indrukken die om orde vragen voor het helder wordt."}
+  {nr:1, naam:"Zelfexpressie", omschrijving:"Jouw unieke, creatieve manier om jezelf te laten zien.", diepgang:"Deze poort zit in het Identiteitscentrum en draait om creativiteit die recht uit wie jij bent komt, niet om een prestatie voor een ander.", sterk:"Een authentieke, herkenbare stijl die niet te kopiëren is.", valkuil:"Jezelf aanpassen aan wat anderen van creativiteit verwachten, waardoor het eigene verdwijnt.", patroon:"Wanneer poort 1 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: afwisselend een periode waarin je vol overtuiging jezelf laat zien, en een periode waarin je je aanpast aan wat je denkt dat anderen willen zien."},
+  {nr:2, naam:"Richting", omschrijving:"Een innerlijk kompas dat de weg wijst, ook als je dat zelf niet altijd doorhebt.", diepgang:"Ook een poort van het Identiteitscentrum, gericht op waar je leven naartoe beweegt, vaak duidelijker voor anderen zichtbaar dan voor jezelf.", sterk:"Een intuïtief gevoel voor de juiste richting, ook zonder concreet plan.", valkuil:"Ongeduldig worden als de richting nog niet helder is, en dan zelf gaan forceren.", patroon:"Wanneer poort 2 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: rustige periodes waarin de richting vanzelf duidelijk wordt, afgewisseld met ongeduld waarop je zelf een richting probeert af te dwingen."},
+  {nr:3, naam:"Orde uit chaos", omschrijving:"Het vermogen om structuur te scheppen in een nieuwe, rommelige situatie.", diepgang:"De eerste ordening na een nieuw begin. Iets nieuws start bijna nooit meteen soepel, en dat is bij deze poort geen probleem maar het proces zelf.", sterk:"Doorzettingsvermogen in de rommelige, onzekere beginfase van iets nieuws.", valkuil:"De chaos van een nieuw begin zien als bewijs dat het niet gaat werken.", patroon:"Wanneer poort 3 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een steeds terugkerende rommelige startfase bij iets nieuws, die vanzelf overgaat in structuur als je volhoudt in plaats van afhaakt."},
+  {nr:4, naam:"Logica", omschrijving:"De behoefte aan een logische verklaring en antwoorden op vragen.", diepgang:"Een mentale poort die formules en antwoorden zoekt, met het besef dat niet elk antwoord meteen het juiste is.", sterk:"Het vermogen om helder na te denken en logische verbanden te leggen.", valkuil:"Een antwoord presenteren als zekerheid, terwijl het eigenlijk nog een aanname is.", patroon:"Wanneer poort 4 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van helder redeneren die soms omslaan in een te stellig gepresenteerd antwoord, terwijl het eigenlijk nog een aanname was."},
+  {nr:5, naam:"Vaste patronen", omschrijving:"Comfort en kracht die ontstaan uit een vast ritme.", diepgang:"Deze poort geeft je lijf houvast via herhaling: vaste tijden, vaste gewoontes, een herkenbaar levensritme.", sterk:"Betrouwbaarheid: mensen weten wanneer ze op je kunnen rekenen.", valkuil:"Star vasthouden aan een ritme, ook als de situatie om iets anders vraagt.", patroon:"Wanneer poort 5 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een vast ritme dat je rust geeft, tot de situatie verandert en je toch nog vasthoudt aan het oude ritme."},
+  {nr:6, naam:"Wrijving", omschrijving:"Het gevoel dat wrijving soms nodig is om nader tot elkaar te komen.", diepgang:"Deze poort gaat over de golfbeweging van nabijheid en afstand in relaties en samenwerking, en over het juiste moment om je open of juist gesloten op te stellen.", sterk:"Een fijn gevoel voor wanneer intimiteit en samenwerking wel of niet passend zijn.", valkuil:"Conflict aangaan of vermijden op het verkeerde moment, waardoor het juist meer wrijving geeft.", patroon:"Wanneer poort 6 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een golfbeweging van openheid en afstand in relaties, die soms op het verkeerde moment omslaat waardoor het meer wrijving geeft dan nodig."},
+  {nr:7, naam:"Leiderschap", omschrijving:"De rol om richting te geven aan een groep, zonder dat je de leider hoeft te zijn.", diepgang:"Een stille vorm van leiderschap: de manier waarop, niet altijd wie er vooraan staat.", sterk:"Natuurlijk gezag zonder dat je jezelf op de voorgrond hoeft te plaatsen.", valkuil:"Leiderschap opeisen uit onzekerheid, in plaats van te vertrouwen op je eigen stijl.", patroon:"Wanneer poort 7 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van natuurlijk gezag, afgewisseld met momenten waarop je een rol opeist die de groep je nog niet heeft gegeven."},
+  {nr:8, naam:"Bijdrage", omschrijving:"De behoefte om je unieke stijl zichtbaar te maken en bij te dragen.", diepgang:"Deze poort wil laten zien wat jij te bieden hebt, als voorbeeld voor anderen, niet om erkenning maar om bij te dragen.", sterk:"Een eigen, herkenbare bijdrage die anderen inspireert hun eigen pad te volgen.", valkuil:"Jezelf zichtbaar maken om gezien te worden, in plaats van vanuit een echte bijdrage.", patroon:"Wanneer poort 8 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het verschil tussen jezelf laten zien vanuit een echte bijdrage, en jezelf zichtbaar maken puur om erkenning te krijgen."},
+  {nr:9, naam:"Focus", omschrijving:"Het vermogen om in kleine details vast te houden en af te maken.", diepgang:"De energie om je op één ding te concentreren tot het klaar is, ook als het minder details zijn dan bij grotere gebaren.", sterk:"Doorzettingsvermogen in details die anderen snel laten afhaken.", valkuil:"Vastlopen in details terwijl het grotere geheel uit het oog verdwijnt.", patroon:"Wanneer poort 9 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van diepe focus op details, die soms omslaan in vastlopen omdat het grotere geheel uit zicht raakt."},
+  {nr:10, naam:"Zelfliefde", omschrijving:"Gedrag dat voortkomt uit trouw zijn aan wie je bent.", diepgang:"De basis van het Identiteitscentrum: jezelf waarderen en gedragen op een manier die bij je past, ongeacht wat anderen ervan vinden.", sterk:"Authenticiteit: je gedraagt je zoals je werkelijk bent, ook onder druk.", valkuil:"Jezelf verliezen in gedrag dat wél bij anderen past, maar niet bij jou.", patroon:"Wanneer poort 10 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes waarin je trouw bent aan jezelf, afgewisseld met momenten waarop je je gedraagt zoals je denkt dat het hoort."},
+  {nr:11, naam:"Ideeën", omschrijving:"Een stroom van gedachten en concepten die gedeeld willen worden.", diepgang:"Deze poort produceert ideeën en beelden, bedoeld om te delen en te inspireren, niet noodzakelijk om zelf allemaal uit te voeren.", sterk:"Een rijke bron van ideeën en inzichten die anderen op gang helpt.", valkuil:"Denken dat elk idee ook uitgevoerd moet worden, wat overweldigend kan werken.", patroon:"Wanneer poort 11 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een golf van ideeën die inspireert, gevolgd door een overweldigd gevoel als je denkt dat je ze allemaal moet uitvoeren."},
+  {nr:12, naam:"Voorzichtigheid", omschrijving:"Het gevoel wanneer je wel of juist niet moet spreken.", diepgang:"Een sociale poort die aanvoelt of de stemming goed is om iets te zeggen, met soms een stilte die net zo veel zegt als woorden.", sterk:"Woorden die raak zijn, juist omdat je wacht op het juiste moment.", valkuil:"Zo lang zwijgen uit voorzichtigheid dat iets belangrijks onuitgesproken blijft.", patroon:"Wanneer poort 12 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van wachten op het juiste moment om te spreken, die soms te lang duren waardoor iets belangrijks onuitgesproken blijft."},
+  {nr:13, naam:"De luisteraar", omschrijving:"Vertrouwen winnen doordat mensen hun verhaal bij je kwijt kunnen.", diepgang:"Mensen vertellen jou dingen die ze niet snel aan een ander vertellen. Uit die verhalen ontstaat op termijn een breder inzicht in mensen.", sterk:"Een vertrouwenwekkende aanwezigheid waar anderen zich vrij voelen om open te zijn.", valkuil:"Verhalen van anderen met je meedragen tot het je eigen last wordt.", patroon:"Wanneer poort 13 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het steeds opnieuw in vertrouwen genomen worden door anderen, tot je merkt dat je hun verhalen als een last met je meedraagt."},
+  {nr:14, naam:"Slagkracht", omschrijving:"Brandstof en drive voor werk dat betekenis heeft.", diepgang:"Een krachtige poort in het Sacraal die middelen en energie genereert voor werk dat je echt zinvol vindt.", sterk:"Grote drive en daadkracht zodra het werk betekenis heeft.", valkuil:"Energie steken in werk zonder betekenis, puur voor het resultaat, en daar leeg van raken.", patroon:"Wanneer poort 14 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van grote daadkracht bij werk dat klopt, die omslaan in leegte zodra het werk zijn betekenis verliest."},
+  {nr:15, naam:"Uitersten", omschrijving:"Het omarmen van de volle breedte van het leven, met pieken en dalen.", diepgang:"Deze poort brengt ritme in het accepteren van uitersten, van mensen en van het leven zelf, zonder daar een oordeel over te vellen.", sterk:"Een groot, warm acceptatievermogen voor de verschillen tussen mensen.", valkuil:"Jezelf of anderen veroordelen in de periodes die minder soepel voelen.", patroon:"Wanneer poort 15 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: golven van acceptatie voor de uitersten van het leven, die soms omslaan in zelfkritiek in de mindere periodes."},
+  {nr:16, naam:"Vaardigheid", omschrijving:"Enthousiasme en talent dat verfijnd wil worden tot meesterschap.", diepgang:"De poort van oefening en enthousiasme: talent alleen is niet genoeg, het wil herhaald en verfijnd worden.", sterk:"Enthousiasme dat aanstekelijk werkt en anderen meesleept.", valkuil:"Enthousiast beginnen zonder de herhaling die nodig is om het talent ook echt te verfijnen.", patroon:"Wanneer poort 16 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een uitbarsting van enthousiasme voor iets nieuws, die wegebt zodra de herhaling begint die nodig is om het te verfijnen."},
+  {nr:17, naam:"Meningen", omschrijving:"Een scherpe blik die patronen en logische verbanden ziet.", diepgang:"Deze poort vormt meningen op basis van patronen die je ziet, bedoeld om te delen en te toetsen, niet als absolute waarheid.", sterk:"Scherp inzicht in patronen en logische verbanden die anderen missen.", valkuil:"Een mening presenteren als feit, in plaats van als perspectief.", patroon:"Wanneer poort 17 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van scherp inzicht die soms omslaan in een mening die te stellig wordt gebracht."},
+  {nr:18, naam:"Correctie", omschrijving:"Het vermogen om te zien wat beter kan, en dat te verbeteren.", diepgang:"Een kritische, verbeterende blik die gericht is op wat beter kan functioneren, het meest waardevol als hij uit plezier komt in plaats van uit ontevredenheid.", sterk:"Een scherp oog voor verbetering dat systemen en gewoontes echt sterker maakt.", valkuil:"Overal kritiek op hebben, ook wanneer er niet om gevraagd is.", patroon:"Wanneer poort 18 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een terugkerende drang om dingen te verbeteren, die soms omslaat in kritiek waar niet om gevraagd is."},
+  {nr:19, naam:"Behoefte", omschrijving:"Gevoeligheid voor wat jij en anderen nodig hebben om je verbonden te voelen.", diepgang:"Deze poort voelt aan wat een groep of relatie nodig heeft om zich verbonden en veilig te voelen, vaak nog voor het benoemd wordt.", sterk:"Fijne gevoeligheid voor wat er nodig is om ergens bij te horen.", valkuil:"Je eigen behoeften wegcijferen om aan die van anderen te voldoen.", patroon:"Wanneer poort 19 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het steeds aanvoelen van wat anderen nodig hebben, ten koste van het merken van je eigen behoefte."},
+  {nr:20, naam:"Het nu", omschrijving:"Aanwezig zijn in het huidige moment, en daaruit handelen.", diepgang:"Een poort van de Keel die vraagt om te handelen vanuit het huidige moment, zonder dat daar altijd tijd voor nadenken bij is.", sterk:"Directe, oprechte aanwezigheid in het hier en nu.", valkuil:"Impulsief spreken of handelen zonder je strategie en autoriteit te raadplegen.", patroon:"Wanneer poort 20 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: momenten van zuivere aanwezigheid die soms omslaan in impulsief handelen zonder je strategie te raadplegen."},
+  {nr:21, naam:"Controle", omschrijving:"De wens om je eigen plek en middelen te beheren.", diepgang:"Een poort die grip wil op de eigen materiële zaken en verantwoordelijkheden, vanuit het Hart-centrum.", sterk:"Sterk vermogen om verantwoordelijkheid en middelen goed te beheren.", valkuil:"Grip proberen te krijgen op zaken die eigenlijk buiten je eigen invloed vallen.", patroon:"Wanneer poort 21 in jouw ontwerp actief is, in het Hart-centrum (ego), is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van goed beheer van je eigen zaken, die soms omslaan in een poging om grip te krijgen op wat niet van jou is."},
+  {nr:22, naam:"Gratie", omschrijving:"Sociale openheid en emotionele charme.", diepgang:"Deze poort brengt sociale gratie en gevoel voor de juiste toon, sterk afhankelijk van de emotionele golf van het moment.", sterk:"Een natuurlijke, warme charme die mensen op hun gemak stelt.", valkuil:"Chagrijnig of afstandelijk overkomen op de mindere momenten van je emotionele golf.", patroon:"Wanneer poort 22 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: sociale gratie die golft met je emoties, warm op goede momenten en afstandelijk op mindere."},
+  {nr:23, naam:"Assimilatie", omschrijving:"Het simpel uitleggen van een inzicht dat eerst ingewikkeld leek.", diepgang:"De poort die individuele, soms rafelige inzichten omzet in iets dat voor anderen behapbaar en bruikbaar is.", sterk:"Het vermogen om complexe inzichten simpel en helder over te brengen.", valkuil:"Een inzicht op een verkeerd moment delen, waardoor het als vreemd of te veel overkomt.", patroon:"Wanneer poort 23 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: inzichten die soms helder landen en soms, op het verkeerde moment gedeeld, als vreemd overkomen."},
+  {nr:24, naam:"Terugkeer", omschrijving:"Steeds opnieuw nadenken tot een gedachte helder is.", diepgang:"Een mentale poort die telkens terugkeert naar hetzelfde thema, tot er via herhaling een nieuw inzicht ontstaat.", sterk:"Doorzettingsvermogen om een lastig thema net zo lang te doordenken tot het klopt.", valkuil:"Blijven malen over hetzelfde zonder dat het nog iets nieuws oplevert.", patroon:"Wanneer poort 24 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het steeds terugkeren naar dezelfde gedachte, wat waardevol is tot het overslaat in nutteloos piekeren."},
+  {nr:25, naam:"Onschuld", omschrijving:"Een universele liefde voor het leven zelf, ongeacht de omstandigheden.", diepgang:"Deze poort in het Identiteitscentrum draagt een onvoorwaardelijke liefde voor het leven, los van wat er gebeurt.", sterk:"Een diep, onvoorwaardelijk vertrouwen in het leven, ook in moeilijke periodes.", valkuil:"Jezelf verwaarlozen doordat je te veel gericht bent op het grotere geheel.", patroon:"Wanneer poort 25 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een diepe liefde voor het geheel van het leven, die soms omslaat in het vergeten van je eigen welzijn."},
+  {nr:26, naam:"De verkoper", omschrijving:"Het vermogen om iets of jezelf overtuigend neer te zetten.", diepgang:"Een poort die overtuigingskracht geeft, het beste ingezet als er ook echt iets van waarde te bieden is.", sterk:"Overtuigingskracht die mensen in beweging krijgt.", valkuil:"Iets mooier voorstellen dan het is om een deal of goedkeuring binnen te halen.", patroon:"Wanneer poort 26 in jouw ontwerp actief is, in het Hart-centrum (ego), is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: overtuigend overbrengen wat je te bieden hebt, dat soms omslaat in het net iets mooier voorstellen dan het is."},
+  {nr:27, naam:"Zorgen", omschrijving:"De zorg voor jezelf en anderen, en verantwoord beheer van middelen.", diepgang:"Een poort in het Sacraal die zorgzaamheid geeft, te beginnen bij jezelf, van waaruit je ook goed voor anderen kunt zorgen.", sterk:"Oprechte, warme zorgzaamheid voor de mensen om je heen.", valkuil:"Zo veel voor anderen zorgen dat je eigen zorg erbij inschiet.", patroon:"Wanneer poort 27 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van zorgen voor anderen, die soms doorschieten omdat de zorg voor jezelf erbij inschiet."},
+  {nr:28, naam:"Het spel", omschrijving:"De zoektocht naar een leven met betekenis, soms via risico.", diepgang:"Deze poort zoekt naar betekenis en is bereid daarvoor risico's te nemen, vanuit de vraag of het leven de moeite waard is geweest.", sterk:"Moed om risico's te nemen voor iets dat er echt toe doet.", valkuil:"Risico's nemen zonder duidelijke betekenis, puur om de spanning.", patroon:"Wanneer poort 28 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het zoeken naar risico's die betekenis geven, dat soms verwordt tot risico om de spanning zelf."},
+  {nr:29, naam:"Volhouden", omschrijving:"De kracht om volledig ja te zeggen tegen een ervaring.", diepgang:"De poort van volledige toewijding: als het sacraal ja zegt, ga je er he­lemaal voor, zonder halve inzet.", sterk:"Volledige, oprechte toewijding aan wat je bent aangegaan.", valkuil:"Overal ja tegen zeggen, ook als de buikreactie eigenlijk nee was.", patroon:"Wanneer poort 29 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van volle toewijding, die soms voortkomen uit een ja waar de buik eigenlijk nee zei."},
+  {nr:30, naam:"Verlangen", omschrijving:"Intense gevoelens en verlangens die om ervaring vragen.", diepgang:"Deze poort brengt intense verlangens en gevoelens die om doorleefde ervaring vragen, met wisselende intensiteit.", sterk:"Een vol, gepassioneerd gevoelsleven dat het leven kleur geeft.", valkuil:"Achter elk verlangen aanjagen zonder de emotionele golf even te laten zakken.", patroon:"Wanneer poort 30 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: intense verlangens die kleur geven aan je leven, en die soms achterna gejaagd worden voor de emotionele golf is gezakt."},
+  {nr:31, naam:"Invloed", omschrijving:"Een stem die gehoord wordt en anderen kan leiden.", diepgang:"De poort van democratisch leiderschap: invloed die ontstaat doordat mensen jou vrijwillig volgen, niet doordat je het opeist.", sterk:"Een natuurlijke, gedragen stem die mensen aanspreekt en verbindt.", valkuil:"Leiderschap claimen zonder dat de groep je dat vertrouwen heeft gegeven.", patroon:"Wanneer poort 31 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van invloed die door anderen gedragen wordt, en soms het opeisen van een stem die nog niet is toevertrouwd."},
+  {nr:32, naam:"Continuïteit", omschrijving:"Aanvoelen wat wel en niet stand zal houden op langere termijn.", diepgang:"Een poort met een fijne intuïtie voor wat op termijn stand houdt, en wat beter losgelaten kan worden.", sterk:"Een scherp gevoel voor wat wel en niet toekomst heeft.", valkuil:"Vasthouden aan iets uit angst voor verandering, ook als het aanvoelen al anders zegt.", patroon:"Wanneer poort 32 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een helder gevoel voor wat wel en niet toekomst heeft, dat soms wordt genegeerd uit angst om los te laten."},
+  {nr:33, naam:"Privacy", omschrijving:"De behoefte aan terugtrekken en later delen wat je hebt geleerd.", diepgang:"Deze poort trekt zich terug om ervaringen te verwerken, om ze later, als er waarde uit gedestilleerd is, alsnog te delen.", sterk:"Waardevolle levenslessen die je, eenmaal gedeeld, anderen echt verder helpen.", valkuil:"Je zo terugtrekken dat waardevolle inzichten nooit gedeeld worden.", patroon:"Wanneer poort 33 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van terugtrekken om te verwerken, gevolgd door het moment waarop je de opgedane wijsheid wel of juist niet deelt."},
+  {nr:34, naam:"Kracht", omschrijving:"Pure, krachtige levensenergie die om beweging vraagt.", diepgang:"De krachtigste poort van het Sacraal, pure levensenergie die alleen bedoeld is om op te reageren, niet om zelf te initiëren.", sterk:"Een enorme hoeveelheid energie zodra je op iets reageert dat klopt.", valkuil:"Die kracht zelf inzetten om iets te initiëren, wat vaak op weerstand stuit.", patroon:"Wanneer poort 34 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: golven van grote kracht die soepel werkt als je erop reageert, en op weerstand stuit zodra je hem zelf inzet om te initiëren."},
+  {nr:35, naam:"Vooruitgang", omschrijving:"De wens om steeds nieuwe ervaringen op te doen.", diepgang:"Deze poort wil vooruit via nieuwe ervaringen, met het besef dat niet elke ervaring evenveel betekenis hoeft te hebben.", sterk:"Een brede levenservaring die je flexibel en veelzijdig maakt.", valkuil:"Onrustig van ervaring naar ervaring hoppen zonder ergens echt te landen.", patroon:"Wanneer poort 35 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een steeds terugkerende behoefte aan iets nieuws, die soms omslaat in rusteloos verder hoppen zonder te landen."},
+  {nr:36, naam:"Crisis", omschrijving:"Emotionele intensiteit die vraagt om doorleefd te worden.", diepgang:"Een poort die emotionele crises en intense nieuwe ervaringen aantrekt, bedoeld om doorleefd te worden in plaats van vermeden.", sterk:"Het vermogen om emotionele intensiteit echt te doorleven en daarvan te groeien.", valkuil:"Intensiteit opzoeken of juist krampachtig vermijden uit angst voor het gevoel zelf.", patroon:"Wanneer poort 36 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van emotionele intensiteit die, eenmaal doorleefd, tot groei leiden, maar die je soms juist opzoekt of krampachtig ontwijkt."},
+  {nr:37, naam:"Vriendschap", omschrijving:"De wens om warmte, familie en gelijkwaardigheid te creëren.", diepgang:"Deze poort bouwt gemeenschap via wederkerigheid: warmte en steun geven in ruil voor warmte en steun terug.", sterk:"Het vermogen om een warme, hechte gemeenschap of familie te bouwen.", valkuil:"Wederkerigheid afdwingen, waardoor warmte gaat voelen als een transactie.", patroon:"Wanneer poort 37 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het bouwen van warmte en steun, dat soms omslaat in het afdwingen van diezelfde warmte terug."},
+  {nr:38, naam:"Verzet", omschrijving:"De wens om te vechten voor wat écht belangrijk is.", diepgang:"De poort van de vechter: verzet dat zin geeft aan het leven, zolang het wordt ingezet voor iets dat echt betekenis heeft.", sterk:"Doorzettingsvermogen om te vechten voor wat er voor jou echt toe doet.", valkuil:"Overal verzet tegen bieden, ook tegen zaken die die strijd niet waard zijn.", patroon:"Wanneer poort 38 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: doorzettingsvermogen voor iets dat er echt toe doet, dat soms verwordt tot verzet tegen dingen die de strijd niet waard zijn."},
+  {nr:39, naam:"Provocatie", omschrijving:"Het losmaken van vaste patronen bij anderen, soms door tegendraads te zijn.", diepgang:"Deze poort provoceert, soms ongemakkelijk, om vaste emotionele patronen bij anderen zichtbaar en bespreekbaar te maken.", sterk:"Het vermogen om met humor of tegendraadsheid vastzittende patronen los te maken.", valkuil:"Provoceren zonder doel, puur om reactie uit te lokken.", patroon:"Wanneer poort 39 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het losmaken van vastzittende emoties bij anderen, dat soms overgaat in provoceren zonder duidelijke reden."},
+  {nr:40, naam:"Alleen zijn", omschrijving:"De behoefte aan eigen tijd na hard werken, om op te laden.", diepgang:"Een poort in het Hart die na periodes van hard werken en geven, om afgebakende tijd alleen vraagt om weer op te laden.", sterk:"Het vermogen om stevig te werken en daarna net zo stevig te herstellen.", valkuil:"Doorgaan met geven zonder de rust te nemen die je verdiend hebt, tot je uitgeput raakt.", patroon:"Wanneer poort 40 in jouw ontwerp actief is, in het Hart-centrum (ego), is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van hard werken die vragen om afgebakende rust, een rust die je soms overslaat tot de uitputting toeslaat."},
+  {nr:41, naam:"Verlangen naar nieuw", omschrijving:"De eerste impuls en fantasie die iets nieuws in gang zet.", diepgang:"Het startpunt van elke nieuwe cyclus: een gevoel van verlangen en fantasie, nog zonder concrete vorm.", sterk:"Een frisse, hoopvolle impuls die nieuwe ervaringen in gang zet.", valkuil:"Blijven fantaseren zonder ooit de eerste stap te zetten.", patroon:"Wanneer poort 41 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een opkomend verlangen naar iets nieuws, dat soms fantasie blijft in plaats van een eerste stap."},
+  {nr:42, naam:"Groei", omschrijving:"Het afronden van een cyclus, gedreven door groei.", diepgang:"De poort die een cyclus volledig afrondt, zodat de groei die erin zat ook echt landt voor je aan iets nieuws begint.", sterk:"Het vermogen om dingen goed af te maken, in plaats van halverwege te stoppen.", valkuil:"Al aan iets nieuws beginnen terwijl het vorige nog niet echt is afgerond.", patroon:"Wanneer poort 42 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: cycli die je netjes afrondt, en de momenten waarop je toch al aan iets nieuws begint voor het vorige klaar is."},
+  {nr:43, naam:"Inzicht", omschrijving:"Een plotseling doorbrekend inzicht dat niet altijd uit te leggen is.", diepgang:"Een individuele poort met inzichten die ineens doorbreken, vaak los van logische stappen, en die tijd nodig hebben om door anderen begrepen te worden.", sterk:"Doorbraken en inzichten die je jaren voor kunnen zijn op de omgeving.", valkuil:"Gefrustreerd raken als anderen je inzicht nog niet kunnen volgen.", patroon:"Wanneer poort 43 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: plotselinge inzichten die je voor bent op je omgeving, gevolgd door frustratie als anderen ze nog niet kunnen volgen."},
+  {nr:44, naam:"Alertheid", omschrijving:"Een instinctief aanvoelen van patronen uit het verleden.", diepgang:"Deze poort herkent patronen uit het verleden razendsnel, nuttig om te weten wie en wat wel of niet te vertrouwen is.", sterk:"Een instinctief, betrouwbaar gevoel voor mensen en patronen die eerder zijn misgegaan.", valkuil:"Wantrouwen op basis van een oud patroon, terwijl de situatie nu anders is.", patroon:"Wanneer poort 44 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een scherp instinct voor wat eerder misging, dat soms wantrouwen oproept naar een situatie die nu anders is."},
+  {nr:45, naam:"De verzamelaar", omschrijving:"De rol om een groep of gemeenschap te verzamelen en te leiden.", diepgang:"Een poort van natuurlijk gezag binnen een groep of gemeenschap, gericht op het beheren en verdelen van gedeelde rijkdom.", sterk:"Het vermogen om mensen te verzamelen rond een gedeeld doel.", valkuil:"Macht of middelen vasthouden zonder dat te delen met de groep.", patroon:"Wanneer poort 45 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het samenbrengen van een groep rond een gedeeld doel, en de verleiding om de opbrengst daarvan niet eerlijk te delen."},
+  {nr:46, naam:"Toewijding", omschrijving:"Geluk en succes door volledig aanwezig te zijn in je lichaam en leven.", diepgang:"Deze poort in het Identiteitscentrum vindt geluk door volledig aanwezig te zijn in het eigen lijf en het huidige leven, zonder dat vooraf te plannen.", sterk:"Het vermogen om, vaak toevallig, op de juiste plek op het juiste moment te zijn.", valkuil:"Zo gericht zijn op een plan dat je de kansen van het huidige moment mist.", patroon:"Wanneer poort 46 in jouw ontwerp actief is, in het Identiteitscentrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: geluk dat ontstaat door aanwezig te zijn in je lijf, dat wegvalt zodra je te vast blijft hangen aan een vooropgezet plan."},
+  {nr:47, naam:"Verwerking", omschrijving:"Het duiden van ervaringen, soms pas jaren later begrepen.", diepgang:"Een mentale poort die indrukken opslaat om ze, soms pas jaren later, alsnog te begrijpen en er betekenis aan te geven.", sterk:"Het vermogen om, met wat afstand in de tijd, diepe betekenis te ontdekken in eerdere ervaringen.", valkuil:"Proberen een ervaring meteen te begrijpen, terwijl de duiding pas later komt.", patroon:"Wanneer poort 47 in jouw ontwerp actief is, in het Ajna-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: ervaringen die pas jaren later hun betekenis prijsgeven, en de drang om ze meteen te willen snappen."},
+  {nr:48, naam:"Diepgang", omschrijving:"De diepte en kennis die nodig is om iets goed op te lossen.", diepgang:"Deze poort in de Milt heeft van nature diepgaande kennis, met soms de angst dat die kennis niet toereikend genoeg is.", sterk:"Een diepe kennisbasis die, eenmaal vertrouwd, oplossingen van echt niveau biedt.", valkuil:"Jezelf ontoereikend voelen, ondanks dat de kennis en diepgang er echt is.", patroon:"Wanneer poort 48 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een diepe kennis die oplossingen biedt, en het gevoel van ontoereikendheid dat daar soms nog naast blijft bestaan."},
+  {nr:49, naam:"Principes", omschrijving:"Sterke persoonlijke waarden over wat wel en niet oké is.", diepgang:"Een poort met duidelijke principes over wat rechtvaardig is binnen relaties en groepen, en de bereidheid banden te verbreken als die principes geschonden worden.", sterk:"Heldere waarden die je helpen kiezen wie en wat bij je past.", valkuil:"Relaties abrupt verbreken bij de eerste keer dat een principe geschonden wordt, zonder ruimte voor gesprek.", patroon:"Wanneer poort 49 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: heldere principes die je helpen kiezen, en het soms te snel verbreken van een band bij de eerste schending ervan."},
+  {nr:50, naam:"Waarden", omschrijving:"Verantwoordelijkheid voor het bewaken van waarden binnen een groep.", diepgang:"Deze poort in het Sacraal bewaakt de waarden en normen binnen een familie of groep, met een sterk gevoel voor wat wel en niet zorgvuldig is.", sterk:"Een natuurlijk gevoel voor verantwoordelijkheid en zorgvuldigheid binnen een groep.", valkuil:"Zo streng vasthouden aan eigen waarden dat er geen ruimte overblijft voor die van een ander.", patroon:"Wanneer poort 50 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: zorgvuldig bewaakte waarden binnen een groep, die soms zo streng worden gehandhaafd dat er geen ruimte overblijft voor een ander."},
+  {nr:51, naam:"Schrik", omschrijving:"De schok die soms nodig is om uit je comfortzone te komen.", diepgang:"Een poort in het Hart die schrik en schok gebruikt om uit de comfortzone te komen en jezelf te overtreffen.", sterk:"Moed om, na de eerste schrik, juist sterker en gedurfder verder te gaan.", valkuil:"Schrik vermijden door risico's uit de weg te gaan, waardoor groei uitblijft.", patroon:"Wanneer poort 51 in jouw ontwerp actief is, in het Hart-centrum (ego), is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het overwinnen van jezelf na een aanvankelijke schrik, en het soms mijden van precies die schrik uit angst."},
+  {nr:52, naam:"Stilte", omschrijving:"De kracht van bewust stilzitten en focussen.", diepgang:"Deze poort in de Wortel geeft de kracht van bewuste stilte, van waaruit diepe focus en concentratie ontstaan.", sterk:"Het vermogen om, in stilte, volledig gefocust te raken op wat belangrijk is.", valkuil:"Onrust voelen bij stilstand en die daardoor krampachtig vermijden.", patroon:"Wanneer poort 52 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: periodes van krachtige stilte en concentratie, die soms worden verstoord door onrust zodra het stil wordt."},
+  {nr:53, naam:"Beginnen", omschrijving:"De energie om ergens aan te beginnen, zonder garantie op afmaken.", diepgang:"De poort van nieuwe starts: energie om te beginnen, waarbij niet elk begin per se hoeft uit te groeien tot iets groots.", sterk:"Moed en energie om steeds weer iets nieuws te beginnen.", valkuil:"Jezelf afrekenen op elk begin dat niet is uitgegroeid tot iets blijvends.", patroon:"Wanneer poort 53 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: de energie om steeds opnieuw te beginnen, en jezelf soms afrekenen op een begin dat niet is uitgegroeid tot iets blijvends."},
+  {nr:54, naam:"Ambitie", omschrijving:"De drive om jezelf naar boven te werken en vooruit te komen.", diepgang:"Een poort in de Wortel met drive om vooruit te komen in status en positie, het meest waardevol wanneer die ambitie ook een dieper doel dient.", sterk:"Sterke drive en doorzettingsvermogen om jezelf te verbeteren.", valkuil:"Vooruitgang najagen puur om de status, zonder dieper doel erachter.", patroon:"Wanneer poort 54 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: ambitie die je vooruit helpt, en periodes waarin die ambitie losraakt van een dieper doel en puur om status gaat."},
+  {nr:55, naam:"Geestkracht", omschrijving:"Emotionele diepgang, afhankelijk van innerlijke rijkdom in plaats van omstandigheden.", diepgang:"Deze poort in de Solar plexus heeft een grillige emotionele golf, met geluk dat uiteindelijk van binnenuit komt, los van de omstandigheden.", sterk:"Emotionele diepgang en veerkracht, ook wanneer de omstandigheden niet meezitten.", valkuil:"Je geluk laten afhangen van omstandigheden die steeds veranderen.", patroon:"Wanneer poort 55 in jouw ontwerp actief is, in het Solar plexus-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een emotionele golf die uiteindelijk innerlijke rijkdom oplevert, maar die onderweg soms wordt toegeschreven aan de omstandigheden van het moment."},
+  {nr:56, naam:"Stimulatie", omschrijving:"Het vertellen van verhalen die anderen boeien en meenemen.", diepgang:"De poort van de verteller: verhalen en ervaringen delen op een manier die anderen boeit, zonder ze te overdrijven.", sterk:"Het vermogen om mensen moeiteloos mee te nemen in een verhaal.", valkuil:"Een verhaal aandikken om het spannender te maken dan het was.", patroon:"Wanneer poort 56 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het moeiteloos boeien van anderen met een verhaal, dat soms wat groter wordt gemaakt dan het werkelijk was."},
+  {nr:57, naam:"Intuïtieve helderheid", omschrijving:"Een helder, in het nu aanwezig aanvoelen van wat veilig is.", diepgang:"De poort van de Milt met de scherpste intuïtie van het systeem, helder in het nu, en het minst gebaat bij overdenken.", sterk:"Een uitzonderlijk helder aanvoelen van wat wel en niet veilig is, in dit moment.", valkuil:"Het heldere signaal wegredeneren doordat het geen logische verklaring heeft.", patroon:"Wanneer poort 57 in jouw ontwerp actief is, in het Milt-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: helder aanvoelen wat veilig is, en het soms wegredeneren van dat signaal omdat er geen logische verklaring bij zit."},
+  {nr:58, naam:"Levenslust", omschrijving:"Puur plezier en vitaliteit, ook in het verbeteren van dingen.", diepgang:"Deze poort in de Wortel brengt puur plezier en levenslust, het meest voelbaar wanneer je geniet van het proces zelf, niet alleen van het resultaat.", sterk:"Aanstekelijke levenslust en energie om dingen steeds beter te maken.", valkuil:"Kritisch worden op wat niet klopt, zonder het plezier in het verbeteren zelf vast te houden.", patroon:"Wanneer poort 58 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: pure levenslust die dingen beter maakt, en kritiek die soms overblijft zonder het plezier dat erbij hoorde."},
+  {nr:59, naam:"Verbinding", omschrijving:"De wens om intieme, oprechte verbinding met een ander te maken.", diepgang:"Een poort in het Sacraal gericht op het doorbreken van afstand tussen mensen, op zoek naar oprechte, intieme verbinding.", sterk:"Het vermogen om snel echte nabijheid en vertrouwen te creëren.", valkuil:"Barrières doorbreken bij mensen die daar zelf nog niet klaar voor zijn.", patroon:"Wanneer poort 59 in jouw ontwerp actief is, in het Sacraal-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het moeiteloos doorbreken van afstand tussen mensen, wat soms gebeurt bij iemand die daar nog niet klaar voor is."},
+  {nr:60, naam:"Acceptatie", omschrijving:"Het accepteren van beperkingen als voorwaarde voor iets nieuws.", diepgang:"De poort van mutatie: door beperkingen te accepteren in plaats van te bevechten, ontstaat juist de ruimte voor iets nieuws.", sterk:"Het vermogen om binnen beperkingen toch iets vernieuwends te creëren.", valkuil:"In verzet blijven tegen een beperking die simpelweg realiteit is.", patroon:"Wanneer poort 60 in jouw ontwerp actief is, in het Wortel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: het accepteren van een beperking als opstap naar iets nieuws, en periodes van verzet tegen diezelfde beperking."},
+  {nr:61, naam:"Mysterie", omschrijving:"Een innerlijke drang om te begrijpen wat niet direct te verklaren is.", diepgang:"Een poort in het Hoofd met een diepe innerlijke drang om te begrijpen wat mysterieus blijft, de bron van veel oorspronkelijke gedachten.", sterk:"Een rijke innerlijke wereld en oprechte nieuwsgierigheid naar het onverklaarbare.", valkuil:"Jezelf gek laten voelen doordat niet alles te verklaren is, en dat te veel proberen af te dwingen.", patroon:"Wanneer poort 61 in jouw ontwerp actief is, in het Hoofd-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een oprechte nieuwsgierigheid naar het onverklaarbare, die soms omslaat in het gevoel dat er iets mis is omdat niet alles te verklaren valt."},
+  {nr:62, naam:"Details", omschrijving:"Het overbrengen van feiten en details op een concrete manier.", diepgang:"Deze poort in de Keel brengt helderheid door concrete feiten en details, in plaats van grote, abstracte lijnen.", sterk:"Het vermogen om iets precies en concreet uit te leggen, zonder ruis.", valkuil:"Zo veel details geven dat de kern van het verhaal ondersneeuwt.", patroon:"Wanneer poort 62 in jouw ontwerp actief is, in het Keel-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: heldere, concrete uitleg, die soms zo gedetailleerd wordt dat de kern van het verhaal ondersneeuwt."},
+  {nr:63, naam:"Twijfel", omschrijving:"Een kritische geest die twijfelt om fouten te voorkomen.", diepgang:"Een poort in het Hoofd die van nature twijfelt en logica test, waardevol als motor voor onderzoek, lastig als het overslaat in wantrouwen.", sterk:"Een scherpe, kritische geest die zwakke plekken in een plan tijdig ziet.", valkuil:"Twijfel laten omslaan in wantrouwen naar mensen of plannen die eigenlijk deugen.", patroon:"Wanneer poort 63 in jouw ontwerp actief is, in het Hoofd-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een kritische geest die zwakke plekken tijdig ziet, en die soms doorschiet in wantrouwen naar iets dat eigenlijk deugt."},
+  {nr:64, naam:"Verwarring", omschrijving:"Een hoofd vol indrukken die om orde vragen voor het helder wordt.", diepgang:"De poort van talloze losse indrukken uit het verleden, die pas na verloop van tijd, via het delen ervan, tot helderheid komen.", sterk:"Een rijke bron van indrukken en beelden die, eenmaal geordend, tot waardevolle inzichten leidt.", valkuil:"Jezelf onder druk zetten om meteen orde te scheppen in een hoofd vol indrukken.", patroon:"Wanneer poort 64 in jouw ontwerp actief is, in het Hoofd-centrum, is dit de reden dat je dit thema in je leven tegenkomt, en zo lees je het patroon: een hoofd vol indrukken die na verloop van tijd tot helderheid komen, en de druk die je jezelf soms oplegt om dat meteen voor elkaar te krijgen."}
 ];
 
 const CHANNEL_INFO = [
-  {gates:[1,8], naam:"Inspiratie", omschrijving:"Jouw unieke bijdrage inspireert en zet een voorbeeld neer voor anderen."},
-  {gates:[2,14], naam:"De Slagader", omschrijving:"Een krachtige, gerichte levensenergie die weet welke richting het opgaat."},
-  {gates:[3,60], naam:"Mutatie", omschrijving:"Energie voor vernieuwing binnen de grenzen van wat mogelijk is."},
-  {gates:[4,63], naam:"Logica", omschrijving:"Het zoeken naar logische antwoorden en formules die twijfel wegnemen."},
-  {gates:[5,15], naam:"Ritme", omschrijving:"Een vast, herkenbaar levensritme dat voor jou en anderen prettig aanvoelt."},
-  {gates:[6,59], naam:"Paring", omschrijving:"De drang naar intieme verbinding en het doorbreken van afstand tussen mensen."},
-  {gates:[7,31], naam:"De Alfa", omschrijving:"Natuurlijk leiderschap dat richting geeft aan een grotere groep."},
-  {gates:[9,52], naam:"Concentratie", omschrijving:"Het vermogen om vastberaden te focussen tot iets is afgerond."},
-  {gates:[10,20], naam:"Ontwaken", omschrijving:"Bewust en oprecht handelen in het huidige moment."},
-  {gates:[10,34], naam:"Verkenning", omschrijving:"Het volgen van je eigen kracht op een manier die bij jou past."},
-  {gates:[10,57], naam:"Perfecte vorm", omschrijving:"Intuïtief aanvoelen wat goed is om te overleven en te floreren."},
-  {gates:[11,56], naam:"Nieuwsgierigheid", omschrijving:"Ideeën verzamelen en delen via verhalen die anderen boeien."},
-  {gates:[12,22], naam:"Openheid", omschrijving:"Sociale gevoeligheid die pas spreekt als het moment er goed voor is."},
-  {gates:[13,33], naam:"De verloren zoon", omschrijving:"Ervaringen verzamelen om later als waardevolle verhalen te delen."},
-  {gates:[16,48], naam:"De golflengte", omschrijving:"Talent dat verdiept wordt tot een vaardigheid waar mensen op vertrouwen."},
-  {gates:[17,62], naam:"Acceptatie", omschrijving:"Georganiseerde meningen die concreet en overtuigend worden overgebracht."},
-  {gates:[18,58], naam:"Oordeel", omschrijving:"Kritisch kijken naar wat beter kan, uit puur plezier in verbetering."},
-  {gates:[19,49], naam:"Synthese", omschrijving:"Gevoeligheid voor wat een groep nodig heeft om zich verbonden te voelen."},
-  {gates:[20,34], naam:"Charisma", omschrijving:"Krachtige, directe actie die anderen in beweging zet."},
-  {gates:[20,57], naam:"De hersengolf", omschrijving:"Intuïtieve alertheid die meteen in actie wordt omgezet."},
-  {gates:[21,45], naam:"Geld", omschrijving:"Het beheren van middelen en materiële zaken binnen een groep."},
-  {gates:[23,43], naam:"Structurering", omschrijving:"Een uniek inzicht helder en simpel uitleggen aan anderen."},
-  {gates:[24,61], naam:"Bewustzijn", omschrijving:"Steeds opnieuw nadenken tot een innerlijk mysterie helder wordt."},
-  {gates:[25,51], naam:"Initiatie", omschrijving:"Puur, onschuldig initiatief nemen, ook als dat een schok geeft."},
-  {gates:[26,44], naam:"Overgave", omschrijving:"Overtuigingskracht gebaseerd op instinctief aanvoelen van het verleden."},
-  {gates:[27,50], naam:"Behoud", omschrijving:"Zorgzaamheid gecombineerd met verantwoordelijk beheer van waarden."},
-  {gates:[28,38], naam:"Strijd", omschrijving:"Doorzettingsvermogen om te vechten voor iets dat het waard is."},
-  {gates:[29,46], naam:"Ontdekking", omschrijving:"Volledige toewijding aan een ervaring, met je lichaam en ziel erbij."},
-  {gates:[30,41], naam:"Herkenning", omschrijving:"Verlangen naar nieuwe ervaringen die iets in jou herkennen."},
-  {gates:[32,54], naam:"Transformatie", omschrijving:"Ambitie en aanvoelen wat wel of niet stand zal houden."},
-  {gates:[34,57], naam:"Kracht", omschrijving:"Pure kracht gestuurd door intuïtief, in het nu aanvoelen wat klopt."},
-  {gates:[35,36], naam:"Vergankelijkheid", omschrijving:"Steeds nieuwe ervaringen opzoeken, ook via emotionele pieken en dalen."},
-  {gates:[37,40], naam:"Gemeenschap", omschrijving:"Warmte en support binnen een familie of hechte kring, in ruil voor toewijding."},
-  {gates:[39,55], naam:"Emotie tonen", omschrijving:"Emotionele diepgang die losgemaakt wordt, soms door tegendraads gedrag."},
-  {gates:[42,53], naam:"Volwassenwording", omschrijving:"Cycli beginnen en afmaken als onderdeel van groei."},
-  {gates:[47,64], naam:"Abstractie", omschrijving:"Indrukken uit het verleden verwerken tot een helder inzicht."}
+  {gates:[1,8], naam:"Inspiratie", centra:"Identiteitscentrum - Keel", omschrijving:"Jouw unieke bijdrage inspireert en zet een voorbeeld neer voor anderen.", sterk:"Een creatieve stijl die anderen aanzet om ook hun eigen pad te volgen.", valkuil:"Zo gericht zijn op je eigen unieke bijdrage dat samenwerken lastig wordt.", los:"Los, alleen poort 1: creativiteit die zoekt naar een podium. Los, alleen poort 8: de behoefte om bij te dragen, zonder altijd het eigen podium te vinden.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 1 en poort 8 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het verschil tussen jezelf laten zien vanuit een echte bijdrage, en jezelf zichtbaar maken puur om erkenning te krijgen."},
+  {gates:[2,14], naam:"De Slagader", centra:"Identiteitscentrum - Sacraal", omschrijving:"Een krachtige, gerichte levensenergie die weet welke richting het opgaat.", sterk:"Een helder innerlijk kompas gecombineerd met de energie om die richting ook echt te volgen.", valkuil:"Zoveel energie hebben dat je ongeduldig wordt als de richting nog niet duidelijk is.", los:"Los, alleen poort 2: een gevoel voor richting zonder de energie om er meteen mee aan de slag te gaan. Los, alleen poort 14: veel werkenergie, op zoek naar de juiste richting.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 2 en poort 14 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Sacraal. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: gerichte, krachtige actie, die soms omslaat in ongeduld wanneer de richting nog niet helder is."},
+  {gates:[3,60], naam:"Mutatie", centra:"Sacraal - Wortel", omschrijving:"Energie voor vernieuwing binnen de grenzen van wat mogelijk is.", sterk:"Het vermogen om structuur te brengen in nieuwe, nog rommelige situaties.", valkuil:"Zo veel nieuwe impulsen willen starten dat er nooit rust of afronding komt.", los:"Los, alleen poort 3: energie voor een nieuw begin, wachtend op een duidelijke vorm. Los, alleen poort 60: gevoel voor beperkingen en het juiste moment, zonder de energie om zelf iets nieuws te starten.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 3 en poort 60 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: orde in een net gestarte, rommelige situatie, en periodes waarin te veel nieuwe impulsen tegelijk voor onrust zorgen."},
+  {gates:[4,63], naam:"Logica", centra:"Ajna - Hoofd", omschrijving:"Het zoeken naar logische antwoorden en formules die twijfel wegnemen.", sterk:"Scherp logisch denken dat helpt om patronen te doorzien en te verklaren.", valkuil:"Een antwoord presenteren als absolute waarheid, terwijl het een van de mogelijke verklaringen is.", los:"Los, alleen poort 4: de wens om een logisch antwoord te vinden, zonder de twijfel die daarbij hoort. Los, alleen poort 63: een kritische, twijfelende geest, op zoek naar een sluitend antwoord.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 4 en poort 63 allebei actief), verbindt het blijvend deze twee centra: Ajna - Hoofd. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: helder redeneren dat patronen doorziet, en het soms te stellig presenteren van een antwoord als zekerheid."},
+  {gates:[5,15], naam:"Ritme", centra:"Sacraal - Identiteitscentrum", omschrijving:"Een vast, herkenbaar levensritme dat voor jou en anderen prettig aanvoelt.", sterk:"Betrouwbaarheid en rust doordat je een vast ritme aanhoudt, ongeacht de waan van de dag.", valkuil:"Star vasthouden aan je ritme, ook wanneer de situatie om flexibiliteit vraagt.", los:"Los, alleen poort 5: de behoefte aan een vast ritme, zonder de energie om dat er altijd doorheen te zetten. Los, alleen poort 15: acceptatie van de uitersten van het leven, zonder een vast eigen ritme.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 5 en poort 15 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Identiteitscentrum. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: een vast, geruststellend ritme, dat soms te star wordt vastgehouden als de situatie om flexibiliteit vraagt."},
+  {gates:[6,59], naam:"Paring", centra:"Solar plexus - Sacraal", omschrijving:"De drang naar intieme verbinding en het doorbreken van afstand tussen mensen.", sterk:"Het vermogen om, op het juiste moment, snel echte nabijheid te creëren.", valkuil:"Barrières doorbreken op het verkeerde moment, waardoor het juist afstand schept.", los:"Los, alleen poort 6: gevoel voor wanneer intimiteit gepast is, zonder de directe energie om die zelf te initiëren. Los, alleen poort 59: de drang naar verbinding, zoekend naar het juiste gevoelsmatige moment.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 6 en poort 59 allebei actief), verbindt het blijvend deze twee centra: Solar plexus - Sacraal. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het scheppen van intimiteit op het juiste moment, en het soms doorbreken van afstand bij iemand die daar nog niet aan toe is."},
+  {gates:[7,31], naam:"De Alfa", centra:"Identiteitscentrum - Keel", omschrijving:"Natuurlijk leiderschap dat richting geeft aan een grotere groep.", sterk:"Leiderschap dat gedragen wordt doordat mensen jou vrijwillig volgen.", valkuil:"Een leidersrol opeisen zonder dat de groep die rol daadwerkelijk aan je heeft toevertrouwd.", los:"Los, alleen poort 7: een stijl van leidinggeven, wachtend op de juiste rol of positie. Los, alleen poort 31: een stem die invloed kan hebben, op zoek naar een duidelijke richting om aan te geven.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 7 en poort 31 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: leiderschap dat mensen vrijwillig volgen, en periodes waarin je een rol opeist die nog niet aan je is toevertrouwd."},
+  {gates:[9,52], naam:"Concentratie", centra:"Sacraal - Wortel", omschrijving:"Het vermogen om vastberaden te focussen tot iets is afgerond.", sterk:"Diepe, vasthoudende concentratie die complexe details tot een goed einde brengt.", valkuil:"Zo vastberaden focussen dat je het grotere plaatje uit het oog verliest.", los:"Los, alleen poort 9: energie voor detailwerk, zoekend naar de juiste focus. Los, alleen poort 52: het vermogen tot stilte en concentratie, zonder de aanhoudende energie om door te zetten.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 9 en poort 52 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: diepe, afmakende concentratie, die soms zo vernauwt dat het grotere geheel uit zicht raakt."},
+  {gates:[10,20], naam:"Ontwaken", centra:"Identiteitscentrum - Keel", omschrijving:"Bewust en oprecht handelen in het huidige moment.", sterk:"Authentiek gedrag en directe woorden die precies bij wie je bent passen.", valkuil:"Impulsief handelen vanuit het moment, zonder je strategie en autoriteit te raadplegen.", los:"Los, alleen poort 10: zelfliefde en trouw aan jezelf, zoekend naar het juiste moment om dat te tonen. Los, alleen poort 20: aanwezigheid in het nu, zoekend naar waar dat vandaan mag komen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 10 en poort 20 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: oprecht, direct handelen vanuit wie je bent, dat soms omslaat in impulsiviteit zonder je strategie te raadplegen."},
+  {gates:[10,34], naam:"Verkenning", centra:"Identiteitscentrum - Sacraal", omschrijving:"Het volgen van je eigen kracht op een manier die bij jou past.", sterk:"Grote, pure levenskracht die volledig gedragen wordt door wie je bent.", valkuil:"Die kracht inzetten om jezelf te bewijzen, in plaats van simpelweg jezelf te zijn.", los:"Los, alleen poort 10: zelfliefde en eigenheid, zonder de pure kracht om daar altijd naar te handelen. Los, alleen poort 34: veel kracht en energie, zoekend naar een authentieke manier om die te uiten.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 10 en poort 34 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Sacraal. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: kracht die volledig bij je past, en momenten waarop diezelfde kracht wordt ingezet om jezelf te bewijzen."},
+  {gates:[10,57], naam:"Perfecte vorm", centra:"Identiteitscentrum - Milt", omschrijving:"Intuïtief aanvoelen wat goed is om te overleven en te floreren.", sterk:"Een scherp, in het lichaam gevoeld aanvoelen van wat wel en niet bij je past.", valkuil:"Dat heldere signaal negeren omdat het niet logisch uit te leggen is.", los:"Los, alleen poort 10: trouw aan jezelf, zoekend naar het intuïtieve signaal dat daarbij hoort. Los, alleen poort 57: scherpe intuïtie, zoekend naar een duidelijke eigen identiteit om die aan te koppelen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 10 en poort 57 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: een scherp aanvoelen van wat goed voor je is, dat soms genegeerd wordt omdat het geen logische uitleg heeft."},
+  {gates:[11,56], naam:"Nieuwsgierigheid", centra:"Ajna - Keel", omschrijving:"Ideeën verzamelen en delen via verhalen die anderen boeien.", sterk:"Een rijke bron van ideeën die op een boeiende manier overgebracht worden.", valkuil:"Verhalen mooier maken dan ze zijn, om de aandacht vast te houden.", los:"Los, alleen poort 11: een stroom van ideeën en concepten, zoekend naar iemand om ze mee te delen. Los, alleen poort 56: het vermogen om te vertellen, zoekend naar ideeën die de moeite van het delen waard zijn.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 11 en poort 56 allebei actief), verbindt het blijvend deze twee centra: Ajna - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het delen van ideeën op een boeiende manier, die af en toe wat wordt aangedikt om de aandacht vast te houden."},
+  {gates:[12,22], naam:"Openheid", centra:"Keel - Solar plexus", omschrijving:"Sociale gevoeligheid die pas spreekt als het moment er goed voor is.", sterk:"Woorden die, juist door het juiste moment af te wachten, echt raak zijn.", valkuil:"Zo lang zwijgen uit voorzichtigheid dat iets belangrijks nooit gezegd wordt.", los:"Los, alleen poort 12: gevoel voor het juiste spreekmoment, zonder de emotionele golf die daarbij hoort. Los, alleen poort 22: sociale gratie en charme, zoekend naar het moment om die te tonen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 12 en poort 22 allebei actief), verbindt het blijvend deze twee centra: Keel - Solar plexus. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: woorden die pas vallen als het moment er rijp voor is, en periodes waarin dat wachten te lang duurt."},
+  {gates:[13,33], naam:"De verloren zoon", centra:"Identiteitscentrum - Keel", omschrijving:"Ervaringen verzamelen om later als waardevolle verhalen te delen.", sterk:"Het vermogen om, na verwerking, waardevolle levenslessen te delen die anderen echt verder helpen.", valkuil:"Je zo terugtrekken in privacy dat de waardevolle verhalen nooit gedeeld worden.", los:"Los, alleen poort 13: de rol van luisteraar, verzamelt verhalen van anderen zonder ze zelf altijd te delen. Los, alleen poort 33: de behoefte aan terugtrekken, zoekend naar het juiste moment om ervaringen te delen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 13 en poort 33 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het verzamelen van ervaringen die later, gedeeld, anderen verder helpen, en periodes van terugtrekken waarin dat delen uitblijft."},
+  {gates:[16,48], naam:"De golflengte", centra:"Keel - Milt", omschrijving:"Talent dat verdiept wordt tot een vaardigheid waar mensen op vertrouwen.", sterk:"Enthousiasme dat, gecombineerd met diepgang, uitgroeit tot echt meesterschap.", valkuil:"Enthousiast beginnen zonder de diepgang op te bouwen die het talent nodig heeft.", los:"Los, alleen poort 16: enthousiasme en talent, zoekend naar de diepgang om het te onderbouwen. Los, alleen poort 48: diepgaande kennis, zoekend naar het enthousiasme om die naar buiten te brengen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 16 en poort 48 allebei actief), verbindt het blijvend deze twee centra: Keel - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: enthousiasme dat via herhaling uitgroeit tot echte vaardigheid, en het soms overslaan van die herhaling."},
+  {gates:[17,62], naam:"Acceptatie", centra:"Ajna - Keel", omschrijving:"Georganiseerde meningen die concreet en overtuigend worden overgebracht.", sterk:"Het vermogen om een goed onderbouwde mening helder en concreet te presenteren.", valkuil:"Een mening presenteren als feit, zonder ruimte voor een andere kijk.", los:"Los, alleen poort 17: een scherpe blik op patronen, zoekend naar de juiste woorden om die te delen. Los, alleen poort 62: precisie in taal en detail, zoekend naar een mening om te onderbouwen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 17 en poort 62 allebei actief), verbindt het blijvend deze twee centra: Ajna - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: een goed onderbouwde, concreet gebrachte mening, die soms te stellig wordt gepresenteerd als de enige waarheid."},
+  {gates:[18,58], naam:"Oordeel", centra:"Milt - Wortel", omschrijving:"Kritisch kijken naar wat beter kan, uit puur plezier in verbetering.", sterk:"Een scherp oog voor verbetering, gecombineerd met plezier in het proces zelf.", valkuil:"Overal kritiek op hebben, zonder dat er om gevraagd is of dat het plezierig blijft.", los:"Los, alleen poort 18: een kritische, verbeterende blik, zoekend naar de energie om er ook echt iets mee te doen. Los, alleen poort 58: levenslust en energie, zoekend naar iets om te verbeteren.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 18 en poort 58 allebei actief), verbindt het blijvend deze twee centra: Milt - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: kritische verbetering die voortkomt uit plezier, en kritiek die soms komt zonder dat erom gevraagd is."},
+  {gates:[19,49], naam:"Synthese", centra:"Wortel - Solar plexus", omschrijving:"Gevoeligheid voor wat een groep nodig heeft om zich verbonden te voelen.", sterk:"Fijne gevoeligheid voor wat een relatie of groep nodig heeft, gecombineerd met heldere waarden.", valkuil:"Relaties verbreken bij de eerste keer dat een principe geschonden lijkt, zonder ruimte voor gesprek.", los:"Los, alleen poort 19: gevoeligheid voor wat nodig is om ergens bij te horen, zoekend naar principes om op te bouwen. Los, alleen poort 49: heldere principes, zoekend naar de gevoeligheid om die soepel toe te passen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 19 en poort 49 allebei actief), verbindt het blijvend deze twee centra: Wortel - Solar plexus. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: fijne aanvoeling voor wat een groep nodig heeft, en het soms te snel verbreken van een band bij een geschonden principe."},
+  {gates:[20,34], naam:"Charisma", centra:"Keel - Sacraal", omschrijving:"Krachtige, directe actie die anderen in beweging zet.", sterk:"Directe, authentieke actie in het nu, die vanzelf anderen aansteekt.", valkuil:"Impulsief handelen zonder je buikreactie of autoriteit even te raadplegen.", los:"Los, alleen poort 20: aanwezigheid in het nu, zoekend naar de kracht om er direct naar te handelen. Los, alleen poort 34: grote kracht, zoekend naar een moment in het nu om die te tonen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 20 en poort 34 allebei actief), verbindt het blijvend deze twee centra: Keel - Sacraal. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: directe actie die anderen aansteekt, en impulsiviteit wanneer de buikreactie niet even geraadpleegd wordt."},
+  {gates:[20,57], naam:"De hersengolf", centra:"Keel - Milt", omschrijving:"Intuïtieve alertheid die meteen in actie wordt omgezet.", sterk:"Het vermogen om intuïtie zonder vertraging om te zetten in raak, direct handelen.", valkuil:"Zo snel handelen op intuïtie dat er geen ruimte meer is om het even te toetsen.", los:"Los, alleen poort 20: aanwezigheid in het moment, zoekend naar de intuïtie om op te vertrouwen. Los, alleen poort 57: scherpe intuïtie, zoekend naar het moment om er direct naar te handelen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 20 en poort 57 allebei actief), verbindt het blijvend deze twee centra: Keel - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: intuïtie die zonder vertraging tot actie leidt, en het soms overslaan van de tijd om dat gevoel even te toetsen."},
+  {gates:[21,45], naam:"Geld", centra:"Hart - Keel", omschrijving:"Het beheren van middelen en materiële zaken binnen een groep.", sterk:"Het vermogen om middelen en verantwoordelijkheden binnen een groep goed te beheren en te verdelen.", valkuil:"Grip willen houden op zaken en mensen die eigenlijk buiten je eigen invloed vallen.", los:"Los, alleen poort 21: de wens om zelf de controle te hebben over je plek en middelen. Los, alleen poort 45: natuurlijk gezag binnen een groep, zoekend naar iemand die de dagelijkse controle regelt.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 21 en poort 45 allebei actief), verbindt het blijvend deze twee centra: Hart - Keel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: verantwoordelijk beheer van gedeelde middelen, en de wens om ook grip te krijgen op zaken die buiten je eigen invloed vallen."},
+  {gates:[23,43], naam:"Structurering", centra:"Keel - Ajna", omschrijving:"Een uniek inzicht helder en simpel uitleggen aan anderen.", sterk:"Het vermogen om een individueel, doorbrekend inzicht toegankelijk te maken voor anderen.", valkuil:"Een inzicht op het verkeerde moment delen, waardoor het als vreemd overkomt in plaats van waardevol.", los:"Los, alleen poort 23: het vermogen om iets simpel uit te leggen, zoekend naar een inzicht om te delen. Los, alleen poort 43: plotselinge inzichten, zoekend naar de juiste woorden om ze over te brengen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 23 en poort 43 allebei actief), verbindt het blijvend deze twee centra: Keel - Ajna. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: een individueel inzicht dat helder wordt gemaakt voor anderen, en momenten waarop dat inzicht op het verkeerde moment wordt gedeeld."},
+  {gates:[24,61], naam:"Bewustzijn", centra:"Ajna - Hoofd", omschrijving:"Steeds opnieuw nadenken tot een innerlijk mysterie helder wordt.", sterk:"Doorzettingsvermogen om een diepe vraag net zo lang te doordenken tot er echt helderheid komt.", valkuil:"Blijven malen over een mysterie dat zich nu eenmaal niet volledig laat verklaren.", los:"Los, alleen poort 24: het vermogen om terug te keren naar een gedachte tot die helder is, zoekend naar het mysterie om over na te denken. Los, alleen poort 61: een innerlijke drang naar begrip, zoekend naar het denkproces om daar grip op te krijgen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 24 en poort 61 allebei actief), verbindt het blijvend deze twee centra: Ajna - Hoofd. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het net zo lang doordenken van een mysterie tot het helder wordt, en periodes waarin dat malen geen nieuwe helderheid meer oplevert."},
+  {gates:[25,51], naam:"Initiatie", centra:"Identiteitscentrum - Hart", omschrijving:"Puur, onschuldig initiatief nemen, ook als dat een schok geeft.", sterk:"Moed om, vanuit een onvoorwaardelijke liefde voor het leven, telkens opnieuw te beginnen.", valkuil:"Jezelf of anderen forceren door schok in te zetten zonder dat daar aanleiding voor is.", los:"Los, alleen poort 25: een universele liefde voor het leven, zoekend naar de moed om daarmee iets te initiëren. Los, alleen poort 51: de energie van schok en doorbraak, zoekend naar een zuivere reden om die in te zetten.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 25 en poort 51 allebei actief), verbindt het blijvend deze twee centra: Identiteitscentrum - Hart. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: puur, onschuldig initiatief, en het soms forceren van een schok zonder dat daar een zuivere reden voor is."},
+  {gates:[26,44], naam:"Overgave", centra:"Hart - Milt", omschrijving:"Overtuigingskracht gebaseerd op instinctief aanvoelen van het verleden.", sterk:"Overtuigingskracht die gebouwd is op een scherp gevoel voor wat eerder wel en niet werkte.", valkuil:"Iets overtuigender voorstellen dan eerlijk is, om een deal of samenwerking te sluiten.", los:"Los, alleen poort 26: overtuigingskracht, zoekend naar de instinctieve kennis om die te onderbouwen. Los, alleen poort 44: instinctief aanvoelen van patronen, zoekend naar de overtuigingskracht om daarnaar te handelen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 26 en poort 44 allebei actief), verbindt het blijvend deze twee centra: Hart - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: overtuigingskracht gebaseerd op instinct over wat werkte, die soms verschuift naar iets mooier voorstellen dan eerlijk is."},
+  {gates:[27,50], naam:"Behoud", centra:"Sacraal - Milt", omschrijving:"Zorgzaamheid gecombineerd met verantwoordelijk beheer van waarden.", sterk:"Warme zorgzaamheid die, gecombineerd met heldere waarden, echt duurzaam voor anderen zorgt.", valkuil:"Zo streng vasthouden aan waarden dat de zorgzaamheid er hard van wordt.", los:"Los, alleen poort 27: de energie om te zorgen, zoekend naar de waarden om dat zorgvuldig te doen. Los, alleen poort 50: heldere waarden en verantwoordelijkheidsgevoel, zoekend naar de energie om daadwerkelijk te zorgen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 27 en poort 50 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: warme zorgzaamheid binnen duidelijke waarden, die soms zo streng wordt dat de warmte erdoor verdwijnt."},
+  {gates:[28,38], naam:"Strijd", centra:"Milt - Wortel", omschrijving:"Doorzettingsvermogen om te vechten voor iets dat het waard is.", sterk:"Grote vasthoudendheid om te vechten voor iets dat echt betekenis heeft.", valkuil:"Overal verzet tegen bieden, ook tegen dingen die de strijd niet waard zijn.", los:"Los, alleen poort 28: de zoektocht naar betekenis, zoekend naar iets om voor te vechten. Los, alleen poort 38: vechtlust en doorzettingsvermogen, zoekend naar een doel dat betekenis geeft.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 28 en poort 38 allebei actief), verbindt het blijvend deze twee centra: Milt - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: vasthoudend vechten voor iets dat er echt toe doet, en verzet dat soms ontstaat tegen dingen die de strijd niet waard zijn."},
+  {gates:[29,46], naam:"Ontdekking", centra:"Sacraal - Identiteitscentrum", omschrijving:"Volledige toewijding aan een ervaring, met je lichaam en ziel erbij.", sterk:"Volledige, oprechte toewijding die ervaringen echt tot leven brengt.", valkuil:"Overal ja tegen zeggen, ook wanneer de buikreactie eigenlijk nee zei.", los:"Los, alleen poort 29: de kracht om volledig ja te zeggen, zoekend naar het lichaam en de aanwezigheid om dat te dragen. Los, alleen poort 46: geluk door aanwezigheid in het lijf, zoekend naar een ervaring om je volledig aan te wijden.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 29 en poort 46 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Identiteitscentrum. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: volledige overgave aan een ervaring, en het soms ja zeggen zonder dat de buik dat ja daadwerkelijk gaf."},
+  {gates:[30,41], naam:"Herkenning", centra:"Solar plexus - Wortel", omschrijving:"Verlangen naar nieuwe ervaringen die iets in jou herkennen.", sterk:"Een rijk gevoelsleven dat, mits de emotionele golf gerespecteerd wordt, tot mooie nieuwe ervaringen leidt.", valkuil:"Achter elk verlangen aanjagen zonder de emotionele golf eerst te laten zakken.", los:"Los, alleen poort 30: intense verlangens, zoekend naar de eerste impuls om die vorm te geven. Los, alleen poort 41: fantasie en een eerste impuls, zoekend naar het verlangen om die op gang te houden.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 30 en poort 41 allebei actief), verbindt het blijvend deze twee centra: Solar plexus - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: intens verlangen dat uitmondt in mooie nieuwe ervaringen, en het achternalopen van dat verlangen voor de emotionele golf is gezakt."},
+  {gates:[32,54], naam:"Transformatie", centra:"Milt - Wortel", omschrijving:"Ambitie en aanvoelen wat wel of niet stand zal houden.", sterk:"Ambitie die, gestuurd door een scherp gevoel voor wat werkt, tot echte groei leidt.", valkuil:"Vasthouden aan iets uit angst voor verandering, ook als je aanvoelt dat het zijn tijd gehad heeft.", los:"Los, alleen poort 32: gevoel voor wat stand houdt, zoekend naar de ambitie om ernaar te handelen. Los, alleen poort 54: drive en ambitie, zoekend naar het aanvoelen van wat wel of niet gaat werken.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 32 en poort 54 allebei actief), verbindt het blijvend deze twee centra: Milt - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: ambitie die groei brengt doordat je aanvoelt wat werkt, en het soms vasthouden aan iets uit angst om het los te laten."},
+  {gates:[34,57], naam:"Kracht", centra:"Sacraal - Milt", omschrijving:"Pure kracht gestuurd door intuïtief, in het nu aanvoelen wat klopt.", sterk:"Enorme levenskracht die, geleid door heldere intuïtie, feilloos het juiste moment vindt.", valkuil:"Die kracht inzetten zonder eerst de intuïtie te raadplegen, wat op weerstand kan stuiten.", los:"Los, alleen poort 34: veel kracht, zoekend naar de intuïtie om die goed te richten. Los, alleen poort 57: scherpe intuïtie, zoekend naar de kracht om er direct naar te handelen.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 34 en poort 57 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Milt. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: enorme levenskracht die feilloos het juiste moment vindt via intuïtie, en kracht die soms wordt ingezet zonder die intuïtie eerst te raadplegen."},
+  {gates:[35,36], naam:"Vergankelijkheid", centra:"Keel - Solar plexus", omschrijving:"Steeds nieuwe ervaringen opzoeken, ook via emotionele pieken en dalen.", sterk:"Een brede levenservaring en het vermogen om emotionele intensiteit echt te doorleven.", valkuil:"Onrustig van ervaring naar ervaring hoppen, op zoek naar steeds meer intensiteit.", los:"Los, alleen poort 35: de wens om vooruit te komen via nieuwe ervaringen, zoekend naar de emotionele diepgang om die te verwerken. Los, alleen poort 36: emotionele intensiteit, zoekend naar nieuwe ervaringen om die in te doorleven.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 35 en poort 36 allebei actief), verbindt het blijvend deze twee centra: Keel - Solar plexus. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: een brede levenservaring die emotionele intensiteit echt doorleeft, en onrust die ontstaat als je van ervaring naar ervaring blijft hoppen."},
+  {gates:[37,40], naam:"Gemeenschap", centra:"Solar plexus - Hart", omschrijving:"Warmte en support binnen een familie of hechte kring, in ruil voor toewijding.", sterk:"Het vermogen om een warme, wederkerige gemeenschap of familie te bouwen.", valkuil:"Wederkerigheid afdwingen, waardoor warmte gaat voelen als een verplichting.", los:"Los, alleen poort 37: de wens om warmte en gelijkwaardigheid te creëren, zoekend naar de toewijding om dat te dragen. Los, alleen poort 40: de behoefte aan eigen tijd na hard werken, zoekend naar de gemeenschap om voor terug te keren.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 37 en poort 40 allebei actief), verbindt het blijvend deze twee centra: Solar plexus - Hart. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het bouwen van een warme, hechte kring, die soms verstart doordat wederkerigheid wordt afgedwongen in plaats van gegeven."},
+  {gates:[39,55], naam:"Emotie tonen", centra:"Wortel - Solar plexus", omschrijving:"Emotionele diepgang die losgemaakt wordt, soms door tegendraads gedrag.", sterk:"Het vermogen om, met humor of tegendraadsheid, verborgen emoties bespreekbaar te maken.", valkuil:"Provoceren zonder duidelijk doel, puur om een reactie los te maken.", los:"Los, alleen poort 39: de wens om vaste patronen los te maken bij anderen, zoekend naar de emotionele diepgang om dat te dragen. Los, alleen poort 55: een grillige emotionele golf, zoekend naar de provocatie die de emotie naar boven haalt.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 39 en poort 55 allebei actief), verbindt het blijvend deze twee centra: Wortel - Solar plexus. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het losmaken van verborgen emotie met humor of tegendraadsheid, en provocatie die soms geen duidelijk doel meer dient."},
+  {gates:[42,53], naam:"Volwassenwording", centra:"Sacraal - Wortel", omschrijving:"Cycli beginnen en afmaken als onderdeel van groei.", sterk:"Het vermogen om een cyclus volledig af te maken, zodat de groei erin ook echt landt.", valkuil:"Al aan iets nieuws beginnen terwijl het vorige nog niet is afgerond.", los:"Los, alleen poort 42: de energie om een cyclus af te ronden, zoekend naar de eerste impuls om te beginnen. Los, alleen poort 53: energie om te beginnen, zoekend naar de volharding om ook af te maken.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 42 en poort 53 allebei actief), verbindt het blijvend deze twee centra: Sacraal - Wortel. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het volledig afronden van een cyclus voor je verder gaat, en het soms toch al beginnen aan iets nieuws terwijl het vorige nog loopt."},
+  {gates:[47,64], naam:"Abstractie", centra:"Ajna - Hoofd", omschrijving:"Indrukken uit het verleden verwerken tot een helder inzicht.", sterk:"Het vermogen om, met wat afstand in de tijd, diepe betekenis te vinden in eerdere indrukken.", valkuil:"Proberen een wirwar aan indrukken meteen te begrijpen, terwijl de duiding pas later komt.", los:"Los, alleen poort 47: het duiden van ervaringen, zoekend naar de indrukken om te verwerken. Los, alleen poort 64: een hoofd vol indrukken, zoekend naar het verwerkingsproces om er helderheid in te vinden.", patroon:"Wanneer dit kanaal in jouw ontwerp compleet is (poort 47 en poort 64 allebei actief), verbindt het blijvend deze twee centra: Ajna - Hoofd. Daardoor is dit thema een constant, betrouwbaar onderdeel van je leven. Zo lees je het patroon: het na verloop van tijd vinden van diepe betekenis in eerdere indrukken, en de drang om een wirwar aan indrukken meteen te willen begrijpen."}
 ];
 
 function renderGates(){
   const grid = document.getElementById('gates-grid');
   grid.innerHTML = GATES.map(g => `
-    <div class="mini-card">
+    <div class="mini-card" data-id="${g.nr}">
       <span class="num">${g.nr}</span><span class="naam">${g.naam}</span>
       <p>${g.omschrijving}</p>
+      <div class="detail">
+        <div class="label">Diepere betekenis</div><p>${g.diepgang}</p>
+        <div class="label">Sterke kant</div><p>${g.sterk}</p>
+        <div class="label">Valkuil</div><p>${g.valkuil}</p>
+        <div class="label">Waarom je dit ervaart &amp; hoe je het leest</div><p>${g.patroon}</p>
+      </div>
     </div>`).join('');
+  grid.querySelectorAll('.mini-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
 }
 
 function renderChannels(){
   const grid = document.getElementById('channels-grid');
   grid.innerHTML = CHANNEL_INFO.map(c => `
-    <div class="mini-card">
+    <div class="mini-card" data-id="${c.gates[0]}-${c.gates[1]}">
       <span class="num">${c.gates[0]}-${c.gates[1]}</span><span class="naam">${c.naam}</span>
+      <span class="centra">${c.centra}</span>
       <p>${c.omschrijving}</p>
+      <div class="detail">
+        <div class="label">Sterke kant</div><p>${c.sterk}</p>
+        <div class="label">Valkuil</div><p>${c.valkuil}</p>
+        <div class="label">Bij een hangende poort</div><p>${c.los}</p>
+        <div class="label">Waarom je dit ervaart &amp; hoe je het leest</div><p>${c.patroon}</p>
+      </div>
     </div>`).join('');
+  grid.querySelectorAll('.mini-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderDefinitie(){
+  const grid = document.getElementById('definitie-grid');
+  grid.innerHTML = DEFINITIE.map(d => `
+    <div class="flip-card" data-id="${d.id}">
+      <div class="row1"><h3>${d.naam}</h3></div>
+      <div class="toggle-hint">klik voor uitleg</div>
+      <div class="detail">
+        <p class="txt">${d.omschrijving}</p>
+        <div class="label">Sterke kant</div><p class="txt">${d.sterk}</p>
+        <div class="label">Valkuil</div><p class="txt">${d.valkuil}</p>
+        <div class="label">Patroon</div><p class="txt">${d.patroon}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderVariabelen(){
+  const grid = document.getElementById('variabelen-grid');
+  grid.innerHTML = VARIABLE_DOMAINS.map(v => `
+    <div class="flip-card" data-id="${v.id}">
+      <div class="row1"><h3>${v.naam}</h3></div>
+      <div class="toggle-hint">${v.vraag} &middot; klik voor uitleg</div>
+      <div class="detail">
+        <div class="label">Bron in je ontwerp</div><p class="txt">${v.bron}</p>
+        <div class="label">Pijl naar links (actief)</div><p class="txt">${v.links}</p>
+        <div class="label">Pijl naar rechts (ontvangend)</div><p class="txt">${v.rechts}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+
+function renderTones(){
+  const grid = document.getElementById('tonen-grid');
+  grid.innerHTML = TONES.map(t => `
+    <div class="flip-card" data-id="${t.nr}">
+      <div class="row1"><h3>Toon ${t.nr} &middot; ${t.zintuig}</h3></div>
+      <div class="toggle-hint">${t.thema} &middot; klik voor uitleg</div>
+      <div class="detail">
+        <div class="label">Wat het betekent</div><p class="txt">${t.omschrijving}</p>
+        <div class="label">Sterke kant</div><p class="txt">${t.sterk}</p>
+        <div class="label">Valkuil</div><p class="txt">${t.valkuil}</p>
+        <div class="label">Concrete tip</div><p class="txt">${t.tip}</p>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
 }
 
 function renderTypes(){
@@ -819,72 +1106,121 @@ function shapePath(c){
   }
 }
 
-function renderBodygraph(){
-  const svg = document.getElementById('bodygraph');
-  const channels = [
-    [140,58,140,75],[140,125,140,144],[140,196,140,212],
-    [140,268,140,330],[140,268,188,255],[140,330,205,290],
-    [140,268,95,290],[140,380,140,404]
-  ];
-  let lines = channels.map(l=>`<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="var(--line)" stroke-width="2"/>`).join('');
-  let shapes = CENTERS.map(c => `
-    <g>
-      <path class="center-shape" data-id="${c.id}" d="${shapePath(c)}" fill="var(--green-pale)" stroke="var(--dark-green)" stroke-width="1.5"/>
-      <text class="bg-label" x="${c.x}" y="${c.y + (c.w*0.95)/2 + 14}">${c.naam}</text>
-    </g>`).join('');
+// Het gekleurde schema van een berekend, persoonlijk design: gedefinieerde
+// centra (goud) versus open centra (wit, met een duidelijke omtrek) voor de
+// laatst opgevraagde persoon. De verbindingslijnen tussen twee centra kleuren
+// mee als beide centra bij deze persoon gedefinieerd zijn. Bewust een
+// afdrukvriendelijke kleurstelling (effen wit/goud met een duidelijke, donkere
+// omtrek en tekst) in plaats van doorzichtig wit op een donkere kaart: bij het
+// afdrukken laten browsers achtergrondkleuren vaak weg (tenzij "afbeeldingen
+// op de achtergrond afdrukken" aanstaat), waardoor een bijna-wit centrum op
+// een donkere kaart bij het afdrukken bijna onzichtbaar zou worden.
+const CENTER_LINES = [
+  {coords:[140,58,140,75], pair:["hoofd","ajna"]},
+  {coords:[140,125,140,144], pair:["ajna","keel"]},
+  {coords:[140,196,140,212], pair:["keel","g"]},
+  {coords:[140,268,140,330], pair:["g","sacraal"]},
+  {coords:[140,268,188,255], pair:["g","hart"]},
+  {coords:[140,330,205,290], pair:["sacraal","solar"]},
+  {coords:[140,268,95,290], pair:["g","milt"]},
+  {coords:[140,380,140,404], pair:["sacraal","wortel"]}
+];
+
+function renderPersonalBodygraph(definedIds){
+  const svg = document.getElementById('bc-bodygraph');
+  if(!svg) return;
+  const lines = CENTER_LINES.map(({coords:l, pair})=>{
+    const active = pair.every(id=>definedIds.includes(id));
+    return `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="${active?'var(--gold)':'var(--line)'}" stroke-width="2"/>`;
+  }).join('');
+  const shapes = CENTERS.map(c=>{
+    const isDef = definedIds.includes(c.id);
+    const fill = isDef ? 'var(--gold)' : '#fff';
+    const stroke = 'var(--dark-green)';
+    const textFill = 'var(--dark-green)';
+    return `<g>
+      <path d="${shapePath(c)}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+      <text x="${c.x}" y="${c.y + (c.w*0.95)/2 + 14}" text-anchor="middle" font-family="'Jost',sans-serif" font-size="10.5" fill="${textFill}">${c.naam}</text>
+    </g>`;
+  }).join('');
   svg.innerHTML = lines + shapes;
-  svg.querySelectorAll('.center-shape').forEach(shape=>{
-    shape.addEventListener('click', ()=> selectCenter(shape.dataset.id));
-  });
 }
 
-let currentCenter = null;
-let currentState = 'gedefinieerd';
-function selectCenter(id){
-  currentCenter = CENTERS.find(c=>c.id===id);
-  currentState = 'gedefinieerd';
-  document.querySelectorAll('.center-shape').forEach(s=>{
-    s.classList.toggle('selected', s.dataset.id===id);
-    s.setAttribute('fill', s.dataset.id===id ? 'var(--gold)' : 'var(--green-pale)');
-  });
-  renderCenterInfo();
-}
-function renderCenterInfo(){
-  const box = document.getElementById('center-info');
-  const c = currentCenter;
-  box.innerHTML = `
-    <h3>${c.naam}</h3>
-    <div class="sub">${c.thema}</div>
-    <div class="state-toggle">
-      <button data-s="gedefinieerd" class="${currentState==='gedefinieerd'?'active':''}">Gedefinieerd</button>
-      <button data-s="open" class="${currentState==='open'?'active':''}">Open</button>
-    </div>
-    <p>${currentState==='gedefinieerd' ? c.gedefinieerd : c.open}</p>
-    <div class="tip">${c.tip}</div>
-  `;
-  box.querySelectorAll('.state-toggle button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ currentState = btn.dataset.s; renderCenterInfo(); });
-  });
-}
+const VAR_SELECT_IDS = {
+  determination:"var-determination-select",
+  environment:"var-environment-select",
+  motivation:"var-motivation-select",
+  perspective:"var-perspective-select"
+};
 
 function renderSelects(){
   const typeSel = document.getElementById('type-select');
   const authSel = document.getElementById('auth-select');
+  const profileSel = document.getElementById('profile-select');
+  const definitieSel = document.getElementById('definitie-select');
   typeSel.innerHTML = TYPES.map(t=>`<option value="${t.id}">${t.naam}</option>`).join('');
   authSel.innerHTML = AUTH.map(a=>`<option value="${a.id}">${a.naam}</option>`).join('');
+  profileSel.innerHTML = `<option value="">Weet ik niet</option>` + PROFILES.map(p=>`<option value="${p.id}">${p.naam}</option>`).join('');
+  definitieSel.innerHTML = `<option value="">Weet ik niet</option>` + DEFINITIE.map(d=>`<option value="${d.id}">${d.naam}</option>`).join('');
+  Object.keys(VAR_SELECT_IDS).forEach(key=>{
+    const v = VARIABLE_DOMAINS.find(x=>x.id===key);
+    document.getElementById(VAR_SELECT_IDS[key]).innerHTML =
+      `<option value="">Weet ik niet</option><option value="links">Links (actief)</option><option value="rechts">Rechts (ontvangend)</option>`;
+  });
 }
 
 document.getElementById('maak-kaart').addEventListener('click', ()=>{
   const t = TYPES.find(x=>x.id===document.getElementById('type-select').value);
   const a = AUTH.find(x=>x.id===document.getElementById('auth-select').value);
   const naam = document.getElementById('naam-input').value.trim() || 'jou';
+  const profielId = document.getElementById('profile-select').value;
+  const definitieId = document.getElementById('definitie-select').value;
 
   document.getElementById('result-naam').textContent = `${t.naam} · autoriteit ${a.naam}`;
   document.getElementById('result-strategie').textContent = t.strategie;
   document.getElementById('result-nietzelf').textContent = t.nietzelf;
   document.getElementById('result-autoriteit').textContent = `${a.praktisch} ("${a.zin}")`;
-  document.getElementById('result-tip').textContent = `${t.tip} ${a.naam !== 'Sacraal' ? '' : ''}`.trim();
+  document.getElementById('result-sterk').innerHTML = [...t.sterk, ...a.sterk].map(x=>`&bull; ${x}`).join('<br>');
+  document.getElementById('result-valkuil').innerHTML = [...t.valkuil, ...a.valkuil].map(x=>`&bull; ${x}`).join('<br>');
+  document.getElementById('result-tip').textContent = t.tip;
+
+  const profBlok = document.getElementById('result-profiel-blok');
+  const profInfo = PROFILES.find(p=>p.id===profielId);
+  if(profInfo){
+    document.getElementById('result-profiel').innerHTML = `${profInfo.naam}<br>${profInfo.uitleg}<br>&bull; Sterke kant: ${profInfo.sterk}<br>&bull; Valkuil: ${profInfo.valkuil}`;
+    profBlok.style.display = 'block';
+  } else {
+    profBlok.style.display = 'none';
+  }
+
+  const defBlok = document.getElementById('result-definitie-blok');
+  const defInfo = DEFINITIE.find(d=>d.id===definitieId);
+  if(defInfo){
+    document.getElementById('result-definitie').innerHTML = `${defInfo.naam}<br>${defInfo.omschrijving}<br>&bull; Sterke kant: ${defInfo.sterk}<br>&bull; Valkuil: ${defInfo.valkuil}`;
+    defBlok.style.display = 'block';
+  } else {
+    defBlok.style.display = 'none';
+  }
+
+  const varLabels = {determination:"Digestie", environment:"Omgeving", motivation:"Motivatie", perspective:"Perspectief"};
+  const varRichtingLabel = {links:"links (actief)", rechts:"rechts (ontvangend)"};
+  const varLines = Object.keys(VAR_SELECT_IDS).map(key=>{
+    const richting = document.getElementById(VAR_SELECT_IDS[key]).value;
+    if(!richting) return null;
+    const domain = VARIABLE_DOMAINS.find(v=>v.id===key);
+    const tekst = richting === 'links' ? domain.links : domain.rechts;
+    return `&bull; ${varLabels[key]} (${varRichtingLabel[richting]}): ${tekst}`;
+  }).filter(Boolean);
+  const varBlok = document.getElementById('result-variabelen-blok');
+  if(varLines.length){
+    document.getElementById('result-variabelen').innerHTML = varLines.join('<br>');
+    varBlok.style.display = 'block';
+  } else {
+    varBlok.style.display = 'none';
+  }
+
   document.querySelector('.result-card h3').textContent = `Toepaskaart van ${naam}`;
+  document.title = naam !== 'jou' ? `Toepaskaart ${naam} · Human Design` : 'Human Design, helder en toepasbaar';
 
   const card = document.getElementById('result-card');
   card.classList.add('show');
@@ -894,7 +1230,13 @@ document.getElementById('maak-kaart').addEventListener('click', ()=>{
 document.getElementById('print-btn').addEventListener('click', ()=> window.print());
 document.getElementById('copy-btn').addEventListener('click', ()=>{
   const c = document.getElementById('result-card');
-  const text = [...c.querySelectorAll('h3, .naam, .k, .v')].map(el=>el.textContent).join('\n');
+  const parts = [c.querySelector('h3').textContent, c.querySelector('.naam').textContent];
+  c.querySelectorAll('.blok').forEach(blok=>{
+    if(blok.offsetParent === null) return;
+    parts.push(blok.querySelector('.k').textContent);
+    parts.push(blok.querySelector('.v').textContent);
+  });
+  const text = parts.join('\n');
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('copy-btn');
     const old = btn.textContent;
@@ -952,8 +1294,13 @@ const CHANNELS = [
 const MOTORS = ["hart","solar","sacraal","wortel"];
 
 function longitudeToGateLine(lonDeg){
-  const gateWidth = 360/64;
-  const lineWidth = gateWidth/6;
+  // Uitgebreide versie: naast poort en lijn ook kleur, toon en basis (de fijnste
+  // onderverdeling van het Human Design mandala, gebruikt voor de variabelen).
+  const gateWidth = 360/64;       // 5.625 graden per poort
+  const lineWidth = gateWidth/6;  // 0.9375 graden per lijn
+  const colorWidth = lineWidth/6; // 0.15625 graden per kleur
+  const toneWidth = colorWidth/6; // ~0.02604 graden per toon
+  const baseWidth = toneWidth/5;  // ~0.00521 graden per basis
   let adjusted = ((lonDeg - 358.25) % 360 + 360) % 360;
   let idx = Math.floor(adjusted / gateWidth);
   if(idx>63) idx = 63;
@@ -961,36 +1308,36 @@ function longitudeToGateLine(lonDeg){
   let line = Math.floor(withinGate/lineWidth) + 1;
   if(line>6) line = 6;
   if(line<1) line = 1;
-  return {gate: GATE_SEQUENCE[idx], line};
+  const withinLine = withinGate - (line-1)*lineWidth;
+  let color = Math.floor(withinLine/colorWidth) + 1;
+  if(color>6) color = 6; if(color<1) color = 1;
+  const withinColor = withinLine - (color-1)*colorWidth;
+  let tone = Math.floor(withinColor/toneWidth) + 1;
+  if(tone>6) tone = 6; if(tone<1) tone = 1;
+  const withinTone = withinColor - (tone-1)*toneWidth;
+  let base = Math.floor(withinTone/baseWidth) + 1;
+  if(base>5) base = 5; if(base<1) base = 1;
+  return {gate: GATE_SEQUENCE[idx], line, color, tone, base};
 }
 
-function meanLunarNodeLongitude(astroTime){
-  const T = astroTime.tt / 36525.0;
-  let omega = 125.0445479 - 1934.1362891*T + 0.0020754*T*T + (T*T*T)/467441 - (T*T*T*T)/60616000;
-  return ((omega % 360) + 360) % 360;
-}
-
+// Exacte (osculerende) ligging van de opgaande Maansknoop op een gegeven moment,
+// rechtstreeks berekend uit de positie- en snelheidsvector van de Maan (impulsmoment
+// h = r x v, knoop = k x h), in plaats van lineair te interpoleren tussen twee
+// momenten waarop de Maan de ecliptica kruist. Interpolatie over zo'n interval van
+// ruim een week kan door de niet-lineaire baanbeweging enkele honderdsten van een
+// graad afwijken: ruim genoeg om, bij de zeer fijne onderverdeling van de variabelen
+// (toon = ongeveer 0,026 graad breed), een pijl per ongeluk de verkeerde kant op te
+// laten wijzen. Deze exacte methode heeft dat probleem niet.
 function trueNorthNodeLongitude(astroTime){
   const A = Astronomy;
-  let searchStart = A.MakeTime(new Date(astroTime.date.getTime() - 40*24*60*60*1000));
-  let cur = A.SearchMoonNode(searchStart);
-  let ascNodes = [];
-  for(let i=0;i<8;i++){
-    if(cur.kind === A.NodeEventKind.Ascending) ascNodes.push(cur);
-    cur = A.NextMoonNode(cur);
-  }
-  for(let i=0;i<ascNodes.length-1;i++){
-    if(ascNodes[i].time.tt <= astroTime.tt && astroTime.tt <= ascNodes[i+1].time.tt){
-      const t0 = ascNodes[i].time, t1 = ascNodes[i+1].time;
-      let l0 = geocentricEclipticLongitude(A.Body.Moon, t0);
-      let l1 = geocentricEclipticLongitude(A.Body.Moon, t1);
-      if(l1 > l0) l1 -= 360;
-      const frac = (astroTime.tt - t0.tt) / (t1.tt - t0.tt);
-      let result = l0 + (l1-l0)*frac;
-      return ((result%360)+360)%360;
-    }
-  }
-  return meanLunarNodeLongitude(astroTime);
+  const state = A.GeoMoonState(astroTime);
+  const rot = A.Rotation_EQJ_ECT(astroTime);
+  const pos = A.RotateVector(rot, new A.Vector(state.x, state.y, state.z, astroTime));
+  const vel = A.RotateVector(rot, new A.Vector(state.vx, state.vy, state.vz, astroTime));
+  const hx = pos.y*vel.z - pos.z*vel.y;
+  const hy = pos.z*vel.x - pos.x*vel.z;
+  const omega = Math.atan2(hx, -hy) * 180/Math.PI;
+  return ((omega % 360) + 360) % 360;
 }
 
 function geocentricEclipticLongitude(body, astroTime){
@@ -1082,13 +1429,18 @@ function calculateChart(naam, datum, tijd, timeZone){
     }
   });
 
-  function isConnected(start, end){
-    if(start===end) return true;
+  function buildAdjacency(){
     const adjacency = {};
     edges.forEach(([x,y])=>{
       (adjacency[x] = adjacency[x]||[]).push(y);
       (adjacency[y] = adjacency[y]||[]).push(x);
     });
+    return adjacency;
+  }
+
+  function isConnected(start, end){
+    if(start===end) return true;
+    const adjacency = buildAdjacency();
     const visited = new Set([start]);
     const queue = [start];
     while(queue.length){
@@ -1101,6 +1453,28 @@ function calculateChart(naam, datum, tijd, timeZone){
       });
     }
     return visited.has(end);
+  }
+
+  // definitie: tel het aantal losse groepen gedefinieerde centra
+  function connectedComponents(){
+    const adjacency = buildAdjacency();
+    const visited = new Set();
+    const comps = [];
+    definedCenters.forEach(node=>{
+      if(visited.has(node)) return;
+      const comp = [];
+      const queue = [node];
+      visited.add(node);
+      while(queue.length){
+        const cur = queue.shift();
+        comp.push(cur);
+        (adjacency[cur]||[]).forEach(next=>{
+          if(!visited.has(next)){ visited.add(next); queue.push(next); }
+        });
+      }
+      comps.push(comp);
+    });
+    return comps;
   }
 
   // type
@@ -1128,13 +1502,125 @@ function calculateChart(naam, datum, tijd, timeZone){
   const profile = `${personality.gateLines.Sun.line}/${design.gateLines.Sun.line}`;
 
   const centerNamen = {hoofd:"Hoofd", ajna:"Ajna", keel:"Keel", g:"Identiteitscentrum", hart:"Hart (ego)", milt:"Milt", sacraal:"Sacraal", solar:"Solar plexus", wortel:"Wortel"};
-  const definedCenterNamen = [...definedCenters].map(c=>centerNamen[c]);
+  const definedCenterIds = [...definedCenters];
+  const definedCenterNamen = definedCenterIds.map(c=>centerNamen[c]);
 
   const definedChannelPairs = CHANNELS.filter(([a,b]) => activatedGates.has(a) && activatedGates.has(b));
 
-  return {naam, type, authority, profile, definedCenterNamen,
+  // definitie
+  const comps = connectedComponents();
+  let definitie;
+  if(definedCenters.size===0) definitie = 'geen';
+  else if(comps.length===1) definitie = 'single';
+  else if(comps.length===2) definitie = 'split';
+  else if(comps.length===3) definitie = 'triple';
+  else definitie = 'quadruple';
+
+  // variabelen / pijlen: gebaseerd op de toon (1-6) van vier vaste posities.
+  // Toon 1-3 = pijl naar links (actief), toon 4-6 = pijl naar rechts (ontvangend).
+  function richting(toneNr){ return toneNr<=3 ? 'links' : 'rechts'; }
+  const variables = {
+    determination: richting(design.gateLines.Sun.tone),
+    environment: richting(design.gateLines.NNode.tone),
+    motivation: richting(personality.gateLines.Sun.tone),
+    perspective: richting(personality.gateLines.NNode.tone)
+  };
+
+  return {naam, type, authority, profile, definitie, comps, variables,
+    definedCenterNamen, definedCenterIds,
     activatedGates: [...activatedGates].sort((a,b)=>a-b),
     definedChannelPairs};
+}
+
+const CENTER_NAAM = {hoofd:"Hoofd", ajna:"Ajna", keel:"Keel", g:"Identiteitscentrum", hart:"Hart (ego)", milt:"Milt", sacraal:"Sacraal", solar:"Solar plexus", wortel:"Wortel"};
+
+function buildNarrative(naam, result, typeInfo, authInfo, defInfo){
+  const parts = [];
+
+  parts.push(`<h4>Jouw type: ${typeInfo.naam}</h4>`);
+  parts.push(`<p>${typeInfo.thema}</p>`);
+  parts.push(`<p><strong>Strategie:</strong> ${typeInfo.strategie}</p>`);
+  parts.push(`<p><strong>Als je deze strategie niet volgt:</strong> ${typeInfo.nietzelf}</p>`);
+  parts.push(`<p><strong>Sterke kant:</strong> ${typeInfo.sterk.join(' ')}</p>`);
+  parts.push(`<p><strong>Valkuil:</strong> ${typeInfo.valkuil.join(' ')}</p>`);
+  parts.push(`<p><strong>Patroon:</strong> ${typeInfo.patroon}</p>`);
+
+  parts.push(`<h4>Jouw autoriteit: ${authInfo.naam}</h4>`);
+  parts.push(`<p>${authInfo.wat} ${authInfo.praktisch}</p>`);
+  parts.push(`<p><strong>Sterke kant:</strong> ${authInfo.sterk.join(' ')}</p>`);
+  parts.push(`<p><strong>Valkuil:</strong> ${authInfo.valkuil.join(' ')}</p>`);
+  parts.push(`<p><strong>Patroon:</strong> ${authInfo.patroon}</p>`);
+
+  const profId = result.profile.replace('/', '-');
+  const profInfo = PROFILES.find(p=>p.id===profId);
+  parts.push(`<h4>Jouw profiel: ${result.profile}${profInfo ? ' · ' + profInfo.naam.split(' · ')[1] : ''}</h4>`);
+  if(profInfo){
+    parts.push(`<p>${profInfo.uitleg}</p>`);
+    parts.push(`<p><strong>Sterke kant:</strong> ${profInfo.sterk}</p>`);
+    parts.push(`<p><strong>Valkuil:</strong> ${profInfo.valkuil}</p>`);
+    parts.push(`<p><strong>Patroon:</strong> ${profInfo.patroon}</p>`);
+  } else {
+    parts.push(`<p>De eerste lijn (${result.profile.split('/')[0]}) is bewust en is hoe jij jezelf ervaart. De tweede lijn (${result.profile.split('/')[1]}) is onbewust en is vaak hoe anderen je zien.</p>`);
+  }
+
+  parts.push(`<h4>Jouw definitie: ${defInfo.naam}</h4>`);
+  parts.push(`<p>${defInfo.omschrijving}</p>`);
+  parts.push(`<p><strong>Sterke kant:</strong> ${defInfo.sterk}</p>`);
+  parts.push(`<p><strong>Valkuil:</strong> ${defInfo.valkuil}</p>`);
+  parts.push(`<p><strong>Patroon:</strong> ${defInfo.patroon}</p>`);
+
+  if(result.definedCenterIds.length){
+    parts.push(`<h4>Wat je gedefinieerde centra over je zeggen</h4>`);
+    result.definedCenterIds.forEach(id=>{
+      const c = CENTERS.find(x=>x.id===id);
+      if(!c) return;
+      parts.push(`<p><strong>${c.naam} (${c.thema}):</strong> ${c.sterk_def} ${c.valkuil_def}</p>`);
+    });
+    const openCenters = CENTERS.filter(c=>!result.definedCenterIds.includes(c.id));
+    if(openCenters.length){
+      parts.push(`<h4>Je open centra, en de wijsheid die daarbij hoort</h4>`);
+      parts.push(`<p>Een open centrum is geen zwakte, het is een plek waar jij wijs bent geworden doordat je de energie van anderen hebt leren kennen.</p>`);
+      openCenters.forEach(c=>{
+        parts.push(`<p><strong>${c.naam}:</strong> ${c.sterk_open} Let op: ${c.valkuil_open.toLowerCase()}</p>`);
+      });
+    }
+  }
+
+  if(result.definedChannelPairs.length){
+    parts.push(`<h4>De kanalen die jouw energie vastleggen</h4>`);
+    parts.push(`<p>Dit zijn de kanalen die bij jou compleet zijn (beide poorten actief). Per kanaal lees je eerst wat het thema is, en daarna waarom je dat thema constant in je leven tegenkomt en hoe je dat teruglezen kunt in je eigen ontwerp.</p>`);
+    result.definedChannelPairs.forEach(([a,b])=>{
+      const c = CHANNEL_INFO.find(x => (x.gates[0]===a && x.gates[1]===b) || (x.gates[0]===b && x.gates[1]===a));
+      if(!c) return;
+      parts.push(`<p><strong>${a}-${b} · ${c.naam}</strong> (${c.centra}): ${c.omschrijving} ${c.sterk} Valkuil: ${c.valkuil.toLowerCase()}</p>`);
+      parts.push(`<p>${c.patroon}</p>`);
+    });
+  }
+
+  const channelGates = new Set(result.definedChannelPairs.flat());
+  const hangingGates = result.activatedGates.filter(g=>!channelGates.has(g));
+  if(hangingGates.length){
+    parts.push(`<h4>Losse poorten (nog geen volledig kanaal)</h4>`);
+    parts.push(`<p>Deze poorten zijn bij jou actief, maar de andere poort van het paar niet. Ze werken niet constant zoals een kanaal, maar geven wel kleur aan je ontwerp, laaien extra op in contact met iemand die de ontbrekende poort wel heeft, en verklaren waarom onderstaande thema's bij vlagen in je leven opduiken.</p>`);
+    hangingGates.forEach(nr=>{
+      const g = GATES.find(x=>x.nr===nr);
+      if(!g) return;
+      parts.push(`<p><strong>${nr} · ${g.naam}:</strong> ${g.diepgang}</p>`);
+      parts.push(`<p>${g.patroon}</p>`);
+    });
+  }
+
+  parts.push(`<h4>Jouw variabelen (pijlen)</h4>`);
+  parts.push(`<p>Dit is het meest technische en verfijnde onderdeel van je ontwerp. De vier pijlen hieronder laten zien in welke richting jouw digestie, omgeving, motivatie en perspectief het beste werken.</p>`);
+  VARIABLE_DOMAINS.forEach(v=>{
+    const richting = result.variables[v.id];
+    parts.push(`<p><strong>${v.naam}:</strong> ${richting === 'links' ? v.links : v.rechts}</p>`);
+  });
+
+  parts.push(`<h4>Tot slot</h4>`);
+  parts.push(`<p>Dit is een uitgebreide, praktische inschatting op basis van je geboortegegevens. Voor een officiële, met de hand gecontroleerde reading kun je terecht bij mij in de praktijk.</p>`);
+
+  return parts.join('');
 }
 
 document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
@@ -1159,11 +1645,18 @@ document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
       const typeInfo = TYPES.find(t=>t.id===result.type);
       const authInfo = AUTH.find(a=>a.id===result.authority);
 
+      const defInfo = DEFINITIE.find(d=>d.id===result.definitie);
+      const varNamen = {determination:"Digestie", environment:"Omgeving", motivation:"Motivatie", perspective:"Perspectief"};
+      const varRichting = {links:"links (actief)", rechts:"rechts (ontvangend)"};
+
       document.getElementById('bc-result-naam').textContent = naam;
       document.getElementById('bc-result-type').textContent = typeInfo.naam;
       document.getElementById('bc-result-auth').textContent = authInfo.naam;
       document.getElementById('bc-result-profile').textContent = `Profiel ${result.profile}`;
+      document.getElementById('bc-result-definitie').textContent = defInfo.naam;
+      document.getElementById('bc-result-variabelen').innerHTML = Object.keys(result.variables).map(k=>`${varNamen[k]}: ${varRichting[result.variables[k]]}`).join('<br>');
       document.getElementById('bc-result-centers').textContent = result.definedCenterNamen.length ? result.definedCenterNamen.join(', ') : 'geen (Reflector)';
+      renderPersonalBodygraph(result.definedCenterIds);
 
       const gateNamen = result.activatedGates.map(nr=>{
         const g = GATES.find(x=>x.nr===nr);
@@ -1183,8 +1676,17 @@ document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
 
       document.getElementById('type-select').value = typeInfo.id;
       document.getElementById('auth-select').value = authInfo.id;
+      const profId = result.profile.replace('/', '-');
+      document.getElementById('profile-select').value = PROFILES.some(p=>p.id===profId) ? profId : '';
+      document.getElementById('definitie-select').value = defInfo.id;
+      Object.keys(VAR_SELECT_IDS).forEach(key=>{
+        document.getElementById(VAR_SELECT_IDS[key]).value = result.variables[key];
+      });
 
       document.getElementById('bc-result').classList.add('show');
+      document.getElementById('bc-narrative').innerHTML = buildNarrative(naam, result, typeInfo, authInfo, defInfo);
+      document.getElementById('bc-narrative-wrap').style.display = 'block';
+      document.title = naam !== 'jou' ? `Human Design ${naam}` : 'Human Design, helder en toepasbaar';
       document.getElementById('bc-result').scrollIntoView({behavior:'smooth', block:'nearest'});
     }catch(err){
       alert('Er ging iets mis bij het berekenen. Controleer de ingevulde gegevens en probeer het opnieuw.');
@@ -1199,17 +1701,56 @@ document.getElementById('bc-bereken-btn').addEventListener('click', ()=>{
 document.getElementById('bc-naar-toepaskaart').addEventListener('click', ()=>{
   document.querySelector('.tab-btn[data-tab="kaart"]').click();
   document.getElementById('naam-input').value = document.getElementById('bc-naam').value;
+  document.getElementById('maak-kaart').click();
+});
+
+document.getElementById('bc-print-btn').addEventListener('click', ()=> window.print());
+
+function htmlToText(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html.replace(/<br\s*\/?>/gi, '\n');
+  return tmp.textContent.trim();
+}
+
+document.getElementById('bc-copy-btn').addEventListener('click', ()=>{
+  const card = document.getElementById('bc-result');
+  const lines = [];
+  lines.push(card.querySelector('h3').textContent.trim());
+  lines.push(card.querySelector('.naam').textContent.trim());
+  lines.push('');
+  card.querySelectorAll('.blok').forEach(blok=>{
+    const label = blok.querySelector('.k').textContent.trim();
+    const value = htmlToText(blok.querySelector('.v').innerHTML);
+    lines.push(`${label}: ${value}`);
+  });
+  const narrativeWrap = document.getElementById('bc-narrative-wrap');
+  if(narrativeWrap.style.display !== 'none'){
+    lines.push('');
+    lines.push('JOUW DESIGN IN WOORDEN');
+    lines.push('');
+    document.getElementById('bc-narrative').querySelectorAll('h4, p').forEach(el=>{
+      lines.push(el.tagName === 'H4' ? el.textContent.trim().toUpperCase() : el.textContent.trim());
+    });
+  }
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('bc-copy-btn');
+    const old = btn.textContent;
+    btn.textContent = 'Gekopieerd';
+    setTimeout(()=> btn.textContent = old, 1500);
+  });
 });
 
 renderTijdzones();
-renderTypes();
-renderAuth();
-renderBodygraph();
 renderSelects();
-renderLines();
-renderProfiles();
-renderGates();
 renderChannels();
+renderGates();
+renderAuth();
+renderProfiles();
+renderLines();
+renderDefinitie();
+renderVariabelen();
+renderTones();
 
 </script>
 </body>
